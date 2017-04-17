@@ -496,7 +496,7 @@ def diners_logs(request):
         return redirect('diners:analytics')
         # return render(request, template, context)    
 
-@login_required(login_url='users:login')
+
 def satisfaction_rating(request):
     if request.method == 'POST':
         if request.POST['type'] == 'satisfaction_rating':
@@ -534,6 +534,21 @@ def satisfaction_rating(request):
 @login_required(login_url='users:login')
 def analytics(request):
     template = 'analytics.html'
+    title = 'Analytics'
+    # ratings = SatisfactionRating.objects.all()
+    tests = SatisfactionRating.objects.order_by('-creation_date')
+    context = {
+        'title': PAGE_TITLE + ' | ' + title,
+        'page_title': title,
+        # 'ratings': ratings,
+        'tests': tests,
+    }
+    return render (request, template, context)
+
+
+@login_required(login_url='users:login')
+def suggestions(request):
+    template = 'suggestions.html'
     title = 'Analytics'
     # ratings = SatisfactionRating.objects.all()
     tests = SatisfactionRating.objects.order_by('-creation_date')
