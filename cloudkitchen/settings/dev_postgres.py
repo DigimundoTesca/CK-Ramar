@@ -10,3 +10,11 @@ DATABASES = {
         'PORT': os.getenv('RAMAR_DB_PORT'),
     }
 }
+
+
+INSTALLED_APPS.append('django-extension')
+
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
