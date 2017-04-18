@@ -1,4 +1,3 @@
-
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 import json,pytz
@@ -89,7 +88,7 @@ def get_diners_per_hour():
         total_entries = 0
 
     return json.dumps(hours_list) 
-   
+
 
 # ------------------------- Django Views ----------------------------- #
 @csrf_exempt
