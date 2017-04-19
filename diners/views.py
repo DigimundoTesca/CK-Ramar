@@ -38,6 +38,14 @@ def get_number_day(dt):
     return days[get_name_day(dt)]
 
 
+def get_start_week_day(day):
+    format = "%w"
+    number_day = int(naive_to_datetime(day).strftime(format))
+    if number_day ==  0:
+        number_day = 7
+    else:
+        day = naive_to_datetime(day) - timedelta(days=number_day-1)
+
 def start_datetime(back_days):
     start_date = date.today() - timedelta(days=back_days) 
     return naive_to_datetime(start_date)
@@ -172,6 +180,81 @@ def satisfaction_rating(request):
 
 @login_required(login_url='users:login')
 def analytics(request):
+    all_suggestions = SatisfactionRating.objects.all()
+    
+    def get_dates_range():
+        """
+        Returns a JSON with a years list.
+        The years list contains years objects that contains a weeks list
+            and the Weeks list contains a weeks objects with two attributes: 
+            start date and final date. Ranges of each week.
+        """
+        try:
+            min_year = all_suggestions.aggregate(Min('creation_date'))['creation_date__min'].year
+            max_year = all_suggestions.aggregate(Max('creation_date'))['creation_date__max'].year
+            years_list = [] # [2015:object, 2016:object, 2017:object, ...]
+            print(min_year)
+        except:
+            return HttpResponse('Necesitas crear ventas para ver esta pantalla <a href="sales:new">Nueva Venta</a>')
+            
+        while max_year >= min_year:
+            year_object = { # 2015:object or 2016:object or 2017:object ...
+                'year' : max_year,
+                'weeks_list' : []
+            }
+
+            ratings_per_year = all_suggestions.filter(
+                creation_date__range=[naive_to_datetime(date(max_year,1,1)),naive_to_datetime(date(max_year,12,31))])
+            
+            for rating in ratings_per_year:
+                if len(year_object['weeks_list']) == 0: 
+                    """
+                    Creates a new week_object in the weeks_list of the actual year_object
+                    """
+                    start_week_day = get_start_week_day(rating.creation_date.date())
+                    week_object = { 
+                        'week_number': rating.creation_date.isocalendar()[1],
+                        'start_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                        'end_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                    }
+                    year_object['weeks_list'].append(week_object)
+                    # End if
+                else: 
+                    """
+                    Validates if exists some week with an indentical week_number of the actual year
+                    If exists a same week in the list validates the start_date and the end_date,
+                    In each case valid if there is an older start date or a more current end date 
+                        if it is the case, update the values.
+                    Else creates a new week_object with the required week number
+                    """
+                    existing_week = False
+                    for week_object in year_object['weeks_list']:
+                        if week_object['week_number'] == rating.creation_date.isocalendar()[1]:
+                            # There's a same week number
+                            existing_week = True
+                            if datetime.strptime(week_object['start_date'], "%d-%m-%Y").date() > rating.creation_date.date():
+                                exists = True
+                                week_object['start_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
+                            elif datetime.strptime(week_object['end_date'], "%d-%m-%Y").date() < rating.creation_date.date():
+                                week_object['end_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
+                            existing_week = True
+                            break
+
+                    if not existing_week:
+                        # There's a different week number
+                        week_object = { 
+                            'week_number': rating.creation_date.isocalendar()[1],
+                            'start_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                            'end_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                        }
+                        year_object['weeks_list'].append(week_object)
+
+                    #End else
+            years_list.append(year_object)
+            max_year -= 1
+        # End while
+        return json.dumps(years_list)
+  
     template = 'analytics.html'
     title = 'Analytics'
     # ratings = SatisfactionRating.objects.all()
@@ -179,7 +262,7 @@ def analytics(request):
     context = {
         'title': PAGE_TITLE + ' | ' + title,
         'page_title': title,
-        # 'ratings': ratings,
+        'dates_range': get_dates_range(),
         'tests': tests,
     }
     return render (request, template, context)
