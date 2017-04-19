@@ -172,21 +172,22 @@ small {
   max-height: 40vh;
 }
 .analytics-container .week-suggestions-chart .canvas-holder {
-  /*background: red;*/
-  /*width: 100% !important;*/
   min-height: 200px;
 }
 .analytics-container .week-suggestions-chart .canvas-holder canvas {
-  /*background: blue;*/
-  /*min-height: 20px !important;*/
   display: flex;
   height: 500px;
-  /*height: inherit;*/
 }
 .analytics-container .charts-container .elements-analytics-container {
   width: 100%;
   padding: 0;
   margin: 0;
+}
+.analytics-container .charts-container .elements-analytics-container .charts-container {
+  border: 1px rgba(0,0,0,0) solid;
+  display: flex;
+  justify-content: center;
+  height: 100%;
 }
 .analytics-container .charts-container .elements-analytics-container .doughnut-chart {
   margin: 0;
@@ -354,9 +355,11 @@ small {
 }
 .container-web-logo .web-logo {
   max-height: 256px;
+  max-width: 100%;
+  padding: 2rem;
 }
 .container-web-logo .web-logo-register {
-  max-height: 196px;
+  max-height: 320px;
 }
 .container-main {
   padding-top: 0;
@@ -410,6 +413,13 @@ small {
 }
 .container-rating .rating-footer {
   display: none;
+}
+.container-rating .rating-footer #elements-container {
+  display: flex;
+  justify-content: center;
+}
+.container-rating .rating-footer #elements-container .element-container {
+  align-self: center;
 }
 .container-rating .rating-footer .btn-option {
   white-space: normal;
