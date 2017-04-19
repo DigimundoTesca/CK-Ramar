@@ -25,24 +25,11 @@
           <div class="col-xs-12">
             <h3>Gráficas de elementos</h3>
           </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
-            <canvas id="canvas-element-1"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
-            <canvas id="canvas-element-2"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
-            <canvas id="canvas-element-3"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
-            <canvas id="canvas-element-4"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
-            <canvas id="canvas-element-5"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
-            <canvas id="canvas-element-6"></canvas>
-          </div>
+          {% for element in elements %}
+            <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
+              <canvas id="canvas-element-{{element.id}}"></canvas>
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -56,24 +43,42 @@
 
 <script type="text/javascript" charset="utf-8" async>
   $(function() {
-    let ctx_week_suggestions = document.getElementById("canvas-week-suggestions"),
-    ctx_element_1 = document.getElementById("canvas-element-1"),
-    ctx_element_2 = document.getElementById("canvas-element-2"),
-    ctx_element_3 = document.getElementById("canvas-element-3"),
-    ctx_element_4 = document.getElementById("canvas-element-4"),
-    ctx_element_5 = document.getElementById("canvas-element-5"),
-    ctx_element_6 = document.getElementById("canvas-element-6");
-
-    let suggestions_week_chart,
-    element_chart_1,
-    element_chart_2,
-    element_chart_3,
-    element_chart_4,
-    element_chart_5,
-    element_chart_6;
-
+    
     let dates_range = JSON.parse('{{ dates_range | safe }}');
-    console.log(dates_range)
+    let suggestions_week = JSON.parse('{{ suggestions_week | safe }}');
+
+
+    let elements_to_avaluate = [];
+    let ctx_week_suggestions = document.getElementById("canvas-week-suggestions");
+    let ctx_elements = [];
+    let elements_charts = [];
+
+    let suggestions_week_chart;
+
+    for (var i = 1; i <= {{ total_elements }}; i++) {
+      ctx_elements.push(document.getElementById("canvas-element-"+i));
+      elements_charts.push(null);
+    }
+
+    {% for element in elements %}
+      elements_to_avaluate.push({
+        'id': '{{ element.id }}',
+        'name': '{{ element.element }}',
+      })
+    {% endfor %}
+
+    
+    function get_suggestions_week_list() {
+      var suggestions_list = [];
+      var count = 0;
+
+      while (count < suggestions_week.length) {
+        suggestions_list.push(parseFloat(suggestions_week[count].total_suggestions));
+        count++;
+      }
+      return suggestions_list;
+    }
+
     /**
      * Draws the chart of suggestions of the day
      */
@@ -83,7 +88,7 @@
         labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"],
         datasets: [{
           label: 'Comentarios del día',
-          data: [10, 50, 20, 32, 12, 34, 187],
+          data: get_suggestions_week_list(),
           backgroundColor: [
           'rgba(26, 188, 156,1.0)',
           'rgba(46, 204, 113, 1.0)',
@@ -128,247 +133,49 @@
       }
     });
 
-
-    element_chart_1 = new Chart(ctx_element_1, {
-      type: 'doughnut',
-      data: {
-        labels: [
-        "Enojado",
-        "Triste",
-        "Contento",
-        "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100, 40],
-          backgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676",
+    for (var i = 0; i < {{ total_elements }}; i++) {
+      element_chart_1 = new Chart(ctx_elements[i], {
+        type: 'doughnut',
+        data: {
+          labels: [
+          "Enojado",
+          "Triste",
+          "Contento",
+          "Enamorado",
           ],
-          hoverBackgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true
+          datasets: [{
+            data: [300, 50, 100, 40],
+            backgroundColor: [
+            "#FF5252",
+            "#FFC400",
+            "#2979FF",
+            "#00E676",
+            ],
+            hoverBackgroundColor: [
+            "#FF5252",
+            "#FFC400",
+            "#2979FF",
+            "#00E676"
+            ]
+          }]
         },
-        title: {
-          display: true,
-          text: 'Elemento',
+        options: {
+          responsive: true,
+          animation: {
+            animateScale: true
+          },
+          title: {
+            display: true,
+            text: elements_to_avaluate[i].name,
+          },
+          legend: {
+            display: false,
+          },
         },
-        legend: {
-          display: false,
-        },
-      },
-    });
+      });
+    }
 
-    element_chart_2 = new Chart(ctx_element_2, {
-      type: 'doughnut',
-      data: {
-        labels: [
-        "Enojado",
-        "Triste",
-        "Contento",
-        "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100, 40],
-          backgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676",
-          ],
-          hoverBackgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-          display: false,
-        },
-      },
-    });
-
-    element_chart_3 = new Chart(ctx_element_3, {
-      type: 'doughnut',
-      data: {
-        labels: [
-        "Enojado",
-        "Triste",
-        "Contento",
-        "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100, 40],
-          backgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676",
-          ],
-          hoverBackgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-          display: false,
-        },
-      },
-    });
-
-    element_chart_4 = new Chart(ctx_element_4, {
-      type: 'doughnut',
-      data: {
-        labels: [
-        "Enojado",
-        "Triste",
-        "Contento",
-        "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100, 40],
-          backgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676",
-          ],
-          hoverBackgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-          display: false,
-        },
-      },
-    });
-
-    element_chart_5 = new Chart(ctx_element_5, {
-      type: 'doughnut',
-      data: {
-        labels: [
-        "Enojado",
-        "Triste",
-        "Contento",
-        "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100, 40],
-          backgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676",
-          ],
-          hoverBackgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-          display: false,
-        },
-      },
-    });
-
-    element_chart_6 = new Chart(ctx_element_6, {
-      type: 'doughnut',
-      data: {
-        labels: [
-        "Enojado",
-        "Triste",
-        "Contento",
-        "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100, 40],
-          backgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676",
-          ],
-          hoverBackgroundColor: [
-          "#FF5252",
-          "#FFC400",
-          "#2979FF",
-          "#00E676"
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-          display: false,
-        },
-      },
-    });
-
+    
     /**
      * Receives a datetime with format from python.
      * Returns an hour converted into 24-hours format: hh:mm ith Timezone +06:00

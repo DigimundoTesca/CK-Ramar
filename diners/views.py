@@ -17,85 +17,61 @@ from django.db.models import Max, Min
 from .models import AccessLog, Diner, ElementToEvaluate, SatisfactionRating
 from cloudkitchen.settings.base import PAGE_TITLE
 
-def get_name_day(datetime_now):
-    days_list = {
-        'MONDAY': 'Lunes',
-        'TUESDAY': 'Martes',
-        'WEDNESDAY': 'Miércoles',
-        'THURSDAY': 'Jueves',
-        'FRIDAY': 'Viernes',
-        'SATURDAY': 'Sábado',
-        'SUNDAY': 'Domingo'
-    }
-    name_day = date(datetime_now.year, datetime_now.month, datetime_now.day)
-    return days_list[name_day.strftime('%A').upper()]
-
-
-def get_number_day(dt):
-    days = {
-        'Lunes': 0, 'Martes': 1, 'Miércoles': 2, 'Jueves': 3, 'Viernes': 4, 'Sábado': 5, 'Domingo': 6,
-    }
-    return days[get_name_day(dt)]
-
-
-def get_start_week_day(day):
-    format = "%w"
-    number_day = int(naive_to_datetime(day).strftime(format))
-    if number_day ==  0:
-        number_day = 7
-    else:
-        day = naive_to_datetime(day) - timedelta(days=number_day-1)
-
-def start_datetime(back_days):
-    start_date = date.today() - timedelta(days=back_days) 
-    return naive_to_datetime(start_date)
-
-
-def end_datetime(back_days):
-    end_date = start_datetime(back_days) + timedelta(days=1)
-    return naive_to_datetime(end_date)
-
-
-def naive_to_datetime(nd):
-    if type(nd) == datetime:
-        if nd.tzinfo is not None and nd.tzinfo.utcoffset(nd) is not None: # Is Aware
-            return nd
-        else: # Is Naive
-            return pytz.timezone('America/Mexico_City').localize(nd)              
-
-    elif type(nd) == date:
-        d = nd
-        t = time(0,0)
-        new_date = datetime.combine(d, t)
-        return pytz.timezone('America/Mexico_City').localize(new_date)
-
-
-def get_diners_per_hour():
-    hours_list = []
-    hours_to_count = 12
-    start_hour = 5
-    customter_count = 0    
-    logs = get_access_logs_today()
-
-    while start_hour <= hours_to_count:
-
-        hour = {            
-            'count': None,
+class Logic(object):
+    """
+    Auxiliar Functions to views logic
+    TODO: assign a good name to the class
+    """
+    def __init__(self):
+        super(Logic, self).__init__()
+        
+    def get_name_day(self, datetime_now):
+        days_list = {
+            'MONDAY': 'Lunes',
+            'TUESDAY': 'Martes',
+            'WEDNESDAY': 'Miércoles',
+            'THURSDAY': 'Jueves',
+            'FRIDAY': 'Viernes',
+            'SATURDAY': 'Sábado',
+            'SUNDAY': 'Domingo'
         }
+        name_day = date(datetime_now.year, datetime_now.month, datetime_now.day)
+        return days_list[name_day.strftime('%A').upper()]
 
-        for log in logs:
-            datetime = str(log.access_to_room)
-            date,time = datetime.split(" ")    
-            if(time.startswith("0"+str(start_hour))):
-                customter_count += 1 
-            hour['count'] = customter_count
+    def get_number_day(self, dt):
+        days = {
+            'Lunes': 0, 'Martes': 1, 'Miércoles': 2, 'Jueves': 3, 'Viernes': 4, 'Sábado': 5, 'Domingo': 6,
+        }
+        return days[self.get_name_day(dt)]
 
-        hours_list.append(hour)        
-        customter_count = 0
-        start_hour += 1
-        total_entries = 0
+    def get_start_week_day(self, day):
+        format = "%w"
+        number_day = int(self.naive_to_datetime(day).strftime(format))
+        if number_day ==  0:
+            number_day = 7
+        else:
+            day = self.naive_to_datetime(day) - timedelta(days=number_day-1)
 
-    return json.dumps(hours_list) 
+    def start_datetime(self, back_days):
+        start_date = date.today() - timedelta(days=back_days) 
+        return self.naive_to_datetime(start_date)
+
+    def end_datetime(self, back_days):
+        end_date = self.start_datetime(back_days) + timedelta(days=1)
+        return self.naive_to_datetime(end_date)
+
+    def naive_to_datetime(self, nd):
+        if type(nd) == datetime:
+            if nd.tzinfo is not None and nd.tzinfo.utcoffset(nd) is not None: # Is Aware
+                return nd
+            else: # Is Naive
+                return pytz.timezone('America/Mexico_City').localize(nd)              
+
+        elif type(nd) == date:
+            d = nd
+            t = time(0,0)
+            new_date = datetime.combine(d, t)
+            return pytz.timezone('America/Mexico_City').localize(new_date)
 
 
 # ------------------------- Django Views ----------------------------- #
@@ -180,8 +156,10 @@ def satisfaction_rating(request):
 
 @login_required(login_url='users:login')
 def analytics(request):
+    logic = Logic()
     all_suggestions = SatisfactionRating.objects.all()
-    
+    all_elements = ElementToEvaluate.objects.all()
+
     def get_dates_range():
         """
         Returns a JSON with a years list.
@@ -204,14 +182,14 @@ def analytics(request):
             }
 
             ratings_per_year = all_suggestions.filter(
-                creation_date__range=[naive_to_datetime(date(max_year,1,1)),naive_to_datetime(date(max_year,12,31))])
+                creation_date__range=[logic.naive_to_datetime(date(max_year,1,1)),logic.naive_to_datetime(date(max_year,12,31))])
             
             for rating in ratings_per_year:
                 if len(year_object['weeks_list']) == 0: 
                     """
                     Creates a new week_object in the weeks_list of the actual year_object
                     """
-                    start_week_day = get_start_week_day(rating.creation_date.date())
+                    start_week_day = logic.get_start_week_day(rating.creation_date.date())
                     week_object = { 
                         'week_number': rating.creation_date.isocalendar()[1],
                         'start_date': rating.creation_date.date().strftime("%d-%m-%Y"),
@@ -254,16 +232,54 @@ def analytics(request):
             max_year -= 1
         # End while
         return json.dumps(years_list)
-  
+    
+
+    def get_suggestions_actual_week():
+        """
+        Gets the following properties for each week's day: Name, Date and suggestions
+        """
+        week_suggestions_list = []
+        total_suggestions = 0
+        days_to_count = logic.get_number_day(datetime.now())
+        day_limit = days_to_count
+        start_date_number = 0
+        
+        while start_date_number <= day_limit:
+            day_object = {
+                'date': str(logic.start_datetime(days_to_count).date().strftime('%d-%m-%Y')),
+                'day_name': None,
+                'total_suggestions': None,
+                'number_day': logic.get_number_day(logic.start_datetime(days_to_count).date()),
+            }
+
+            suggestions = all_suggestions.filter(creation_date__range=[logic.start_datetime(days_to_count), logic.end_datetime(days_to_count)])
+
+            for suggestion in suggestions:
+                if suggestion.suggestion:
+                    total_suggestions += 1
+
+            day_object['total_suggestions'] = str(total_suggestions)
+            day_object['day_name'] = logic.get_name_day(logic.start_datetime(days_to_count).date())
+
+            week_suggestions_list.append(day_object)
+
+            # restarting counters
+            days_to_count -= 1
+            total_suggestions = 0
+            start_date_number += 1
+
+        return json.dumps(week_suggestions_list)
+
     template = 'analytics.html'
     title = 'Analytics'
     # ratings = SatisfactionRating.objects.all()
-    tests = SatisfactionRating.objects.order_by('-creation_date')
     context = {
         'title': PAGE_TITLE + ' | ' + title,
         'page_title': title,
         'dates_range': get_dates_range(),
-        'tests': tests,
+        'suggestions_week':get_suggestions_actual_week(),
+        'elements': all_elements,
+        'total_elements': all_elements.count(),
     }
     return render (request, template, context)
 
@@ -286,40 +302,5 @@ def suggestions(request):
 # --------------------------- TEST ------------------------
 @login_required(login_url='users:login')
 def test(request):
-    rfids = [ 52661 ,]
-
-    for rfid in rfids:
-        dt = naive_to_datetime(datetime(2017,3,23,13,30))
-        rfid = str(rfid)
-        if rfid is None:
-            print('No se recibió RFID\n')
-        else:
-            access_logs = get_access_logs(dt)
-            exists = False
-            
-            for log in access_logs:
-                if rfid == log.RFID:
-                    exists = True
-                    if settings.DEBUG:
-                        print('es identico...........')
-                    break
-
-            if exists:
-                if settings.DEBUG:
-                    print('El usuario ya se ha registrado')
-            else:
-                if len(rfid) < 7:
-                    try:
-                        diner = Diner.objects.get(RFID=rfid)
-                        new_access_log = AccessLog(diner=diner, RFID=rfid, access_to_room=dt)
-                        new_access_log.save()
-                    except Diner.DoesNotExist:
-                        new_access_log = AccessLog(diner=None, RFID=rfid, access_to_room=dt)
-                        new_access_log.save()
-                        if settings.DEBUG:   
-                            print('Nuevo comensal\n')
-                else:
-                    if settings.DEBUG:
-                        print('RFID Inválido\n')
-
+    
     return HttpResponse('Hola')
