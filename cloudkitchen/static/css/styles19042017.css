@@ -178,6 +178,30 @@ small {
   display: flex;
   height: 500px;
 }
+.analytics-container .charts-container .elements-header {
+  border-radius: 5px !important;
+  overflow: hidden;
+  /*padding: 0.1rem;*/
+  /*background: red;*/
+  /*border: 1px blue solid;*/
+}
+.analytics-container .charts-container .element-name {
+  font-weight: 600;
+  color: #fbfbfb;
+  text-align: center;
+}
+.analytics-container .charts-container .element-red {
+  background: #FF5252;
+}
+.analytics-container .charts-container .element-yellow {
+  background: #FFC400;
+}
+.analytics-container .charts-container .element-blue {
+  background: #2979FF;
+}
+.analytics-container .charts-container .element-green {
+  background: #00E676;
+}
 .analytics-container .charts-container .elements-analytics-container {
   width: 100%;
   padding: 0;

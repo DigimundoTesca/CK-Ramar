@@ -27,12 +27,28 @@
           </div>
         </div>
         <div class="col-xs-12 col-lg-6 mb-3 elements-analytics-container">
-          <div class="col-xs-12">
-            <h3>Gráficas de elementos</h3>
+          <div class="row">
+            <div class="col-xs-12">
+              <h3>Gráficas de elementos</h3>
+            </div>
           </div>
-          <div class="charts-container row">
+          <div class="row elements-header">
+            <div class="col-xs-6 col-lg-3 element-name element-red">
+              Enojado
+            </div>
+            <div class="col-xs-6 col-lg-3 element-name element-yellow">
+              Triste
+            </div>
+            <div class="col-xs-6 col-lg-3 element-name element-blue">
+              Alegre
+            </div>
+            <div class="col-xs-6 col-lg-3 element-name element-green">
+              Encantado
+            </div>
+          </div>
+          <div class="charts-container row mt-2">
             {% for element in elements %}
-              <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4">
+              <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4 mb-3">
                 <canvas id="canvas-element-{{element.id}}"></canvas>
               </div>
             {% endfor %}
@@ -152,7 +168,7 @@
           "Enojado",
           "Triste",
           "Contento",
-          "Enamorado",
+          "Encantado",
           ],
           datasets: [{
             data: data,
