@@ -11,16 +11,11 @@
     </div>
   </div>
   <div class="row">
-  <div class="col-xs-12">
-    <p class="alert alert-info mt-1">
-      Los valores mostrados son de Testing. 
-    </p>
-  </div>
     <div class="col-xs-12 charts-container">
       <div class="col-xs-12">
         <div class="col-xs-12 col-lg-6 mb-3 week-suggestions-chart">
           <div class="col-xs-12">
-            <h3>Participación</h3>
+            <h3>Comentarios hechos</h3>
           </div>
           <div class="canvas-holder">
             <canvas id="canvas-week-suggestions"></canvas>
@@ -29,21 +24,21 @@
         <div class="col-xs-12 col-lg-6 mb-3 elements-analytics-container">
           <div class="row">
             <div class="col-xs-12">
-              <h3>Gráficas de elementos</h3>
+              <h3>Reacciones de clientes</h3>
             </div>
           </div>
           <div class="row elements-header">
-            <div class="col-xs-6 col-lg-3 element-name element-red">
-              Enojado
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-red">Enojado</span>
             </div>
-            <div class="col-xs-6 col-lg-3 element-name element-yellow">
-              Triste
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-yellow">Triste</span>
             </div>
-            <div class="col-xs-6 col-lg-3 element-name element-blue">
-              Alegre
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-blue">Alegre</span>
             </div>
-            <div class="col-xs-6 col-lg-3 element-name element-green">
-              Encantado
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-green">Encantado</span>
             </div>
           </div>
           <div class="charts-container row mt-2">
@@ -161,17 +156,18 @@
       for(var j = 0; j < 4; j++) {
         data[j] = parseInt(Math.random() * 100  );
       }
-      element_chart_1 = new Chart(ctx_elements[i], {
+      elements_charts[i] = new Chart(ctx_elements[i], {
         type: 'doughnut',
         data: {
           labels: [
           "Enojado",
           "Triste",
-          "Contento",
+          "Alegre",
           "Encantado",
+          "Sin Reacciones",
           ],
           datasets: [{
-            data: data,
+            data: [0,0,0,0,0],
             backgroundColor: [
             "#FF5252",
             "#FFC400",
@@ -183,10 +179,17 @@
             "#FFC400",
             "#2979FF",
             "#00E676"
-            ]
-          }]
+            ],
+          }],
         },
         options: {
+          cutoutPercentage: 50,
+          // rotation: 50,
+          // circumference: 5,
+          // animation.animateScale: true,
+          // animation: {
+          //   animateScale: true,
+          // },
           responsive: true,
           animation: {
             animateScale: true
@@ -200,9 +203,22 @@
           },
         },
       });
+      let is_empty = true;
+
+      for(var j = 0; j < elements_charts[i].config.data.datasets[0].data.length; j++){
+        if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
+          is_empty = false;
+        }
+      }
+      if(is_empty) {
+        elements_charts[i].config.data.datasets[0].data[4] = 1;
+        elements_charts[i].config.options.tooltips.callbacks.label = function () {
+          return ' Sin reacciones';
+        }
+        elements_charts[i].update();
+        }
     }
 
-    
     /**
      * Receives a datetime with format from python.
      * Returns an hour converted into 24-hours format: hh:mm ith Timezone +06:00
