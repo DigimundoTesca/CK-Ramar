@@ -163,6 +163,7 @@ def analytics(request):
     all_elements = ElementToEvaluate.objects.all()
 
     def get_dates_range():
+
         """
         Returns a JSON with a years list.
         The years list contains years objects that contains a weeks list
@@ -183,7 +184,7 @@ def analytics(request):
             }
 
             ratings_per_year = all_suggestions.filter(
-                creation_date__range=[date(max_year,1,1),date(max_year,12,31)])
+                creation_date__range=[logic.naive_to_datetime(date(max_year,1,1)),logic.naive_to_datetime(date(max_year,12,31))])
             for rating in ratings_per_year:
                 if len(year_object['weeks_list']) == 0: 
                     """
@@ -212,7 +213,6 @@ def analytics(request):
                             # There's a same week number
                             existing_week = True
                             if datetime.strptime(week_object['start_date'], "%d-%m-%Y").date() > rating.creation_date.date():
-                                print('hola')
                                 exists = True
                                 week_object['start_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
                             elif datetime.strptime(week_object['end_date'], "%d-%m-%Y").date() < rating.creation_date.date():
@@ -233,6 +233,7 @@ def analytics(request):
                     #End else
             years_list.append(year_object)
             max_year -= 1
+
         # End while
         return json.dumps(years_list)
 
@@ -281,33 +282,26 @@ def analytics(request):
             start_date = logic.naive_to_datetime(datetime.strptime(request.POST['date'], '%d-%m-%Y').date())
             end_date = logic.naive_to_datetime(start_date + timedelta(days=1))
             today_suggestions = get_suggestions(start_date, end_date)
-            # print('today', today_suggestions)
             reactions_list = []
-
             for element_to_evaluate in all_elements:
                 """ For every element chart """
                 element_object = {
                     'id': element_to_evaluate.id,
                     'name': element_to_evaluate.element,
                     'reactions': {
-                        1:{'reaction':'Enojado', 'quantity': 0},
-                        2:{'reaction':'Triste', 'quantity': 0},
-                        3:{'reaction':'Feliz', 'quantity': 0},
-                        4:{'reaction':'Encantado', 'quantity': 0},
+                        0:{'reaction':'Enojado', 'quantity': 0},
+                        1:{'reaction':'Triste', 'quantity': 0},
+                        2:{'reaction':'Feliz', 'quantity': 0},
+                        3:{'reaction':'Encantado', 'quantity': 0},
                     },
                 }
-                # print(today_suggestions)
                 for suggestion in today_suggestions:
                     for element_in_suggestion in suggestion.elements.all():
-                        # print(element_in_suggestion)
                         if element_in_suggestion == element_to_evaluate:
-                            # print(element_object['reactions'][suggestion.satisfaction_rating])
-                            # print(element_object['reactions'][suggestion.satisfaction_rating]['quantity'])
-                            element_object['reactions'][suggestion.satisfaction_rating]['quantity'] += 1
+                            element_object['reactions'][suggestion.satisfaction_rating-1]['quantity'] += 1
                         break
 
                 reactions_list.append(element_object)
-            # print(reactions_list)
             return JsonResponse(reactions_list, safe=False)
     template = 'analytics.html'
     title = 'Analytics'

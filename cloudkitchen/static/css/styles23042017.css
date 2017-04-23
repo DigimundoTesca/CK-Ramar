@@ -171,6 +171,10 @@ small {
 .analytics-container .suggestions-container .card {
   max-height: 40vh;
 }
+.analytics-container .week-suggestions-chart {
+  padding: 0;
+
+}
 .analytics-container .week-suggestions-chart .canvas-holder {
   min-height: 200px;
 }
@@ -178,7 +182,13 @@ small {
   display: flex;
   height: 500px;
 }
-.analytics-container .charts-container .element-name {
+.analytics-container .charts-container {
+  padding: 0;
+}
+.analytics-container .charts-container .elements-header {
+  margin: 0;
+}
+.analytics-container .charts-container .elements-header .element-name {
   color: #fbfbfb;
   font-weight: 600;
   text-align: center;
@@ -211,6 +221,7 @@ small {
   background: #00E676;
 }
 .analytics-container .charts-container .elements-analytics-container {
+  overflow: hidden;
   width: 100%;
   padding: 0;
   margin: 0;

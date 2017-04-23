@@ -100,7 +100,6 @@
      * show the results in reactions day chart
      */
     function set_reactions_day_chart(date) {
-    console.log(date)
       $.ajax({
         url: "{% url 'diners:analytics' %}",
         type: 'POST',
@@ -119,41 +118,40 @@
           // swal.enableLoading();
         },
         success: function(result) {
-          console.log(result)
           for(var i = 0; i < {{ total_elements }}; i++){
             let is_empty = true;
-
+            /**
+             * Sets the doughnuts with the new values
+             */
             for(var j = 0; j < 4; j++){
-              elements_charts[i].data.datasets[0].data[j] = parseInt(Math.random() * 10);
+              elements_charts[i].data.datasets[0].data[j] = result[i].reactions[j].quantity;
             }
-            elements_charts[i].data.datasets[0].data[4] = 0;
+            console.log(elements_charts[i].config.data.datasets[0]);
 
-            elements_charts[i].update();
-            for(var j = 0; j < elements_charts[i].config.data.datasets[0].data.length; j++){
+            /**
+             * Validates the charts and change them if any of these do not have doesn't have values
+             */
+            for(var j = 0; j < 4; j++){
               if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
                 is_empty = false;
               }
             }
             if(is_empty) {
-              elements_charts[i].config.data.datasets[0].data[4] = 1;
               elements_charts[i].config.options.tooltips.callbacks.label = function () {
                 return ' Sin reacciones';
               }
-              elements_charts[i].update();
+              elements_charts[i].config.data.datasets[0].data[4] = 1;
             } else {
               elements_charts[i].config.data.datasets[0].data.splice(4,1);
             }
+            elements_charts[i].update();
           }
-
-          // sales_day_earnings_list = get_sales_day_list(initial_hour, final_hour, separation_time, sales_day_object_list);
-          // earnings_day_chart.data.datasets[0].data = sales_day_earnings_list;
-          // earnings_day_chart.update();
 
           swal({
             title: "Éxito",
             text: "Gráfica generada",
             type: "success",
-            timer: 600,
+            timer: 1000,
             showConfirmButton: false
           }).then(
           function(){},
