@@ -13,7 +13,7 @@
   <div class="row">
     <div class="col-xs-12 charts-container">
       <div class="col-xs-12">
-        <div class="col-xs-12 col-lg-6 mb-3 week-suggestions-chart">
+        <div class="col-xs-12 col-lg-6 col-xl-5 mb-3 week-suggestions-chart">
           <div class="col-xs-12">
             <h3>Comentarios hechos</h3>
           </div>
@@ -21,14 +21,14 @@
             <canvas id="canvas-week-suggestions"></canvas>
           </div>
         </div>
-        <div class="col-xs-12 col-lg-6 mb-3 elements-analytics-container">
+        <div class="col-xs-12 col-lg-6 col-xl-7 mb-3 elements-analytics-container">
           <div class="row">
             <div class="col-xs-12">
               <h3>Reacciones de clientes</h3>
             </div>
           </div>
           <div class="row elements-header">
-            <div class="col-xs-6 col-lg-3 element-name-cont">
+            <div class="col-xs-6 col-lg-3  element-name-cont">
               <span class="element-name element-red">Enojado</span>
             </div>
             <div class="col-xs-6 col-lg-3 element-name-cont">
@@ -43,7 +43,7 @@
           </div>
           <div class="charts-container row mt-2">
             {% for element in elements %}
-              <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4 mb-3">
+              <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4 col-xl-3 mb-3">
                 <canvas id="canvas-element-{{element.id}}"></canvas>
               </div>
             {% endfor %}
@@ -69,8 +69,6 @@
     let ctx_reactions = [];
     let elements_charts = [];
     let today_date;
-
-
     let suggestions_week_chart;
 
     for (var i = 1; i <= {{ total_elements }}; i++) {
@@ -101,9 +99,8 @@
      * Get's the suggestions of the selected day in week chart and
      * show the results in reactions day chart
      */
-    function set_sales_day_chart(date) {
-      var earnings_list = [];
-
+    function set_reactions_day_chart(date) {
+    console.log(date)
       $.ajax({
         url: "{% url 'diners:analytics' %}",
         type: 'POST',
@@ -122,16 +119,35 @@
           // swal.enableLoading();
         },
         success: function(result) {
-          var sales_day_earnings_list = [];
-          var initial_hour = '08:00',
-              final_hour = '16:00',
-              separation_time = 60; // In minutes
-          var sales_day_object_list = result['sales_day_list'];
-          var total_datas = sales_day_object_list.length;
+          console.log(result)
+          for(var i = 0; i < {{ total_elements }}; i++){
+            let is_empty = true;
 
-          sales_day_earnings_list = get_sales_day_list(initial_hour, final_hour, separation_time, sales_day_object_list);
-          earnings_day_chart.data.datasets[0].data = sales_day_earnings_list;
-          earnings_day_chart.update();
+            for(var j = 0; j < 4; j++){
+              elements_charts[i].data.datasets[0].data[j] = parseInt(Math.random() * 10);
+            }
+            elements_charts[i].data.datasets[0].data[4] = 0;
+
+            elements_charts[i].update();
+            for(var j = 0; j < elements_charts[i].config.data.datasets[0].data.length; j++){
+              if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
+                is_empty = false;
+              }
+            }
+            if(is_empty) {
+              elements_charts[i].config.data.datasets[0].data[4] = 1;
+              elements_charts[i].config.options.tooltips.callbacks.label = function () {
+                return ' Sin reacciones';
+              }
+              elements_charts[i].update();
+            } else {
+              elements_charts[i].config.data.datasets[0].data.splice(4,1);
+            }
+          }
+
+          // sales_day_earnings_list = get_sales_day_list(initial_hour, final_hour, separation_time, sales_day_object_list);
+          // earnings_day_chart.data.datasets[0].data = sales_day_earnings_list;
+          // earnings_day_chart.update();
 
           swal({
             title: "Éxito",
@@ -188,8 +204,7 @@
             var selected_day = legendItem[0]._index;
             for (var i = 0; i < suggestions_week.length; i++) {
               if (suggestions_week[i].number_day == selected_day) {
-                // set_sales_day_chart(suggestions_week[i].date);
-                console.log(selected_day)
+                set_reactions_day_chart(suggestions_week[i].date);
               }
             };
           } catch (error) {
@@ -265,20 +280,6 @@
           },
         },
       });
-      let is_empty = true;
-
-      for(var j = 0; j < elements_charts[i].config.data.datasets[0].data.length; j++){
-        if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
-          is_empty = false;
-        }
-      }
-      if(is_empty) {
-        elements_charts[i].config.data.datasets[0].data[4] = 1;
-        elements_charts[i].config.options.tooltips.callbacks.label = function () {
-          return ' Sin reacciones';
-        }
-        elements_charts[i].update();
-        }
     }
 
     /**
@@ -333,9 +334,8 @@
       });
       today_date = $('#dt-week').val().split(',')[1];
     }
-
     fill_dates_range_form();
-
+    set_reactions_day_chart(today_date)
 
    });
 

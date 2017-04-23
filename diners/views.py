@@ -17,12 +17,14 @@ from django.db.models import Max, Min
 from .models import AccessLog, Diner, ElementToEvaluate, SatisfactionRating
 from cloudkitchen.settings.base import PAGE_TITLE
 
+
 class Logic(object):
     """
     Auxiliar Functions to views logic
     TODO: assign a good name to the class
     """
     def __init__(self):
+        self.tz = pytz.timezone('America/Mexico_City')
         super(Logic, self).__init__()
         
     def get_name_day(self, datetime_now):
@@ -65,13 +67,13 @@ class Logic(object):
             if nd.tzinfo is not None and nd.tzinfo.utcoffset(nd) is not None: # Is Aware
                 return nd
             else: # Is Naive
-                return pytz.timezone('America/Mexico_City').localize(nd)              
+                return self.tz.localize(nd)              
 
         elif type(nd) == date:
             d = nd
             t = time(0,0)
             new_date = datetime.combine(d, t)
-            return pytz.timezone('America/Mexico_City').localize(new_date)
+            return self.tz.localize(new_date)
 
 
 # ------------------------- Django Views ----------------------------- #
@@ -171,7 +173,6 @@ def analytics(request):
             min_year = all_suggestions.aggregate(Min('creation_date'))['creation_date__min'].year
             max_year = all_suggestions.aggregate(Max('creation_date'))['creation_date__max'].year
             years_list = [] # [2015:object, 2016:object, 2017:object, ...]
-            print(min_year)
         except:
             return HttpResponse('Necesitas crear ventas para ver esta pantalla <a href="sales:new">Nueva Venta</a>')
             
@@ -182,8 +183,7 @@ def analytics(request):
             }
 
             ratings_per_year = all_suggestions.filter(
-                creation_date__range=[logic.naive_to_datetime(date(max_year,1,1)),logic.naive_to_datetime(date(max_year,12,31))])
-            
+                creation_date__range=[date(max_year,1,1),date(max_year,12,31)])
             for rating in ratings_per_year:
                 if len(year_object['weeks_list']) == 0: 
                     """
@@ -207,14 +207,17 @@ def analytics(request):
                     """
                     existing_week = False
                     for week_object in year_object['weeks_list']:
+
                         if week_object['week_number'] == rating.creation_date.isocalendar()[1]:
                             # There's a same week number
                             existing_week = True
                             if datetime.strptime(week_object['start_date'], "%d-%m-%Y").date() > rating.creation_date.date():
+                                print('hola')
                                 exists = True
                                 week_object['start_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
                             elif datetime.strptime(week_object['end_date'], "%d-%m-%Y").date() < rating.creation_date.date():
                                 week_object['end_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
+
                             existing_week = True
                             break
 
@@ -232,7 +235,6 @@ def analytics(request):
             max_year -= 1
         # End while
         return json.dumps(years_list)
-    
 
     def get_suggestions_actual_week():
         """
@@ -270,6 +272,43 @@ def analytics(request):
 
         return json.dumps(week_suggestions_list)
 
+    def  get_suggestions(initial_date, final_date):
+        return all_suggestions.filter(
+                creation_date__range=(initial_date, final_date)).order_by('-creation_date')
+
+    if request.method == 'POST':
+        if request.POST['type'] == 'reactions_day':
+            start_date = logic.naive_to_datetime(datetime.strptime(request.POST['date'], '%d-%m-%Y').date())
+            end_date = logic.naive_to_datetime(start_date + timedelta(days=1))
+            today_suggestions = get_suggestions(start_date, end_date)
+            # print('today', today_suggestions)
+            reactions_list = []
+
+            for element_to_evaluate in all_elements:
+                """ For every element chart """
+                element_object = {
+                    'id': element_to_evaluate.id,
+                    'name': element_to_evaluate.element,
+                    'reactions': {
+                        1:{'reaction':'Enojado', 'quantity': 0},
+                        2:{'reaction':'Triste', 'quantity': 0},
+                        3:{'reaction':'Feliz', 'quantity': 0},
+                        4:{'reaction':'Encantado', 'quantity': 0},
+                    },
+                }
+                # print(today_suggestions)
+                for suggestion in today_suggestions:
+                    for element_in_suggestion in suggestion.elements.all():
+                        # print(element_in_suggestion)
+                        if element_in_suggestion == element_to_evaluate:
+                            # print(element_object['reactions'][suggestion.satisfaction_rating])
+                            # print(element_object['reactions'][suggestion.satisfaction_rating]['quantity'])
+                            element_object['reactions'][suggestion.satisfaction_rating]['quantity'] += 1
+                        break
+
+                reactions_list.append(element_object)
+            # print(reactions_list)
+            return JsonResponse(reactions_list, safe=False)
     template = 'analytics.html'
     title = 'Analytics'
     # ratings = SatisfactionRating.objects.all()

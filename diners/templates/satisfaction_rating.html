@@ -85,7 +85,12 @@
      */
     $(this).on('click', '.emoji-container', function(event) {
       let emoji = $(this);
+      let emojis = $('.emoji');
+      emojis.removeClass('selected');
+      emojis.addClass('ghost');
       emoji_level = emoji.attr('class').split(' ');
+      emoji.find('.emoji').addClass('selected')
+
       /**
        * Gets the emoji level
        */
@@ -206,7 +211,6 @@
           btn_text_icon.text('keyboard_arrow_up')
         };
         data['suggestion'] = $(this).val();
-        console.log(data['suggestion']);
       };
 
       if (data['suggestion'].length == 0) {
@@ -237,12 +241,11 @@
           swal.enableLoading();
         },
         success: function(result) {
-          console.log(result);
           swal({
             title: 'Los grandes cambios comienzan con una opinión',
             text: '¡Gracias!',
             type: "success",
-            timer: 3000,
+            timer: 2000,
             showConfirmButton: false
           }).then(
             function() {},
@@ -263,7 +266,6 @@
             function() {},
             function(dismiss) {}
           );
-          console.log(result);
         },
       });
     });

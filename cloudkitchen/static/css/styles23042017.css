@@ -425,21 +425,31 @@ small {
   display: flex;
   justify-content: center;
 }
-.container-rating .emoji-container {
+.container-rating figure.emoji-container {
+  align-items: center;
   cursor: pointer;
   display: flex;
+  height: 160px;
   justify-content: center;
-  height: 100px;
-  width: 100px;
+  margin: 0 auto;
+  width: 160px;
 }
-.container-rating .emoji {
-  display: block;
+.container-rating img.emoji {
+  display: flex;
   transition: all 0.3s ease;
-  height: 85%;
-  width: 85%;
+  height: 80%;
+  width: 80%;
+  opacity: 0.9;
 }
+.container-rating img.emoji.ghost {
+  transition: all 0.3s ease;
+  height: 75%;
+  width: 75%; 
+  opacity: 0.4;
+}
+.container-rating .emoji-container .emoji.selected,
 .container-rating .emoji-container .emoji:hover {
-  opacity: 0.8;
+  opacity: 1;
   height: 100%;
   width: 100%;
 }
