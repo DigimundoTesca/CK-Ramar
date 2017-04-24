@@ -126,7 +126,6 @@
             for(var j = 0; j < 4; j++){
               elements_charts[i].data.datasets[0].data[j] = result[i].reactions[j].quantity;
             }
-            console.log(elements_charts[i].config.data.datasets[0]);
 
             /**
              * Validates the charts and change them if any of these do not have doesn't have values
@@ -142,10 +141,18 @@
               }
               elements_charts[i].config.data.datasets[0].data[4] = 1;
             } else {
+              elements_charts[i].config.options.tooltips.callbacks.label = function(tooltipItem, data) {
+                var dataLabel = data.labels[tooltipItem.index];
+                var value = ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                dataLabel += value;
+                return dataLabel;
+              }
               elements_charts[i].config.data.datasets[0].data.splice(4,1);
             }
             elements_charts[i].update();
           }
+
 
           swal({
             title: "Éxito",

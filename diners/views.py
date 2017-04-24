@@ -299,7 +299,6 @@ def analytics(request):
                     for element_in_suggestion in suggestion.elements.all():
                         if element_in_suggestion == element_to_evaluate:
                             element_object['reactions'][suggestion.satisfaction_rating-1]['quantity'] += 1
-                        break
 
                 reactions_list.append(element_object)
             return JsonResponse(reactions_list, safe=False)
