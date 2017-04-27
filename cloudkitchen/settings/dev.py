@@ -9,7 +9,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, '../db_temporal.sqlite3'),
     }
 }
-INSTALLED_APPS.append('django_extensions')
 
 GRAPH_MODELS = {
   'all_applications': True,

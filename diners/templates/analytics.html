@@ -64,25 +64,25 @@
     
     let dates_range = JSON.parse('{{ dates_range | safe }}');
     let suggestions_week = JSON.parse('{{ suggestions_week | safe }}');
-    let elements_to_avaluate = [];
+    let elements_to_evaluate = []; // Reactions data
     let ctx_week_suggestions = document.getElementById("canvas-week-suggestions");
-    let ctx_reactions = [];
-    let elements_charts = [];
+    let ctx_reactions = []; // sugestions elements charts (DOM)
+    let elements_charts = []; // // sugestions elements charts (Chart Objects)
     let today_date;
     let suggestions_week_chart;
 
-    for (var i = 1; i <= {{ total_elements }}; i++) {
-      ctx_reactions.push(document.getElementById("canvas-element-"+i));
-      elements_charts.push(null);
-    }
-
     {% for element in elements %}
-      elements_to_avaluate.push({
+      elements_to_evaluate.push({
         'id': '{{ element.id }}',
         'name': '{{ element.element }}',
       })
     {% endfor %}
-
+    
+    for (var i = 0; i < {{ total_elements }}; i++) {
+      let element_id = elements_to_evaluate[i].id;
+      element_id = "canvas-element-" + element_id;
+      ctx_reactions.push(document.getElementById(element_id));
+    }
     
     function get_suggestions_week_list() {
       var suggestions_list = [];
@@ -173,7 +173,7 @@
     }
 
     /**
-     * Draws the chart of suggestions of the day
+     * Draws the chart of reactions of the day
      */
     suggestions_week_chart = new Chart(ctx_week_suggestions, {
       type: 'bar',
@@ -278,7 +278,7 @@
           },
           title: {
             display: true,
-            text: elements_to_avaluate[i].name,
+            text: elements_to_evaluate[i].name,
           },
           legend: {
             display: false,
