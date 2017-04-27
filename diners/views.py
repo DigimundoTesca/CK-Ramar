@@ -175,7 +175,9 @@ def analytics(request):
             max_year = all_suggestions.aggregate(Max('creation_date'))['creation_date__max'].year
             years_list = [] # [2015:object, 2016:object, 2017:object, ...]
         except:
-            return HttpResponse('Necesitas crear ventas para ver esta pantalla <a href="sales:new">Nueva Venta</a>')
+            min_year = datetime.now().year
+            max_year = datetime.now().year
+            years_list = [] # [2015:object, 2016:object, 2017:object, ...]
             
         while max_year >= min_year:
             year_object = { # 2015:object or 2016:object or 2017:object ...
@@ -233,7 +235,6 @@ def analytics(request):
                     #End else
             years_list.append(year_object)
             max_year -= 1
-
         # End while
         return json.dumps(years_list)
 

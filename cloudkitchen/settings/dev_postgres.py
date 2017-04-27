@@ -12,7 +12,7 @@ DATABASES = {
 }
 
 
-INSTALLED_APPS.append('django-extension')
+INSTALLED_APPS.append('django_extension')
 
 GRAPH_MODELS = {
   'all_applications': True,
