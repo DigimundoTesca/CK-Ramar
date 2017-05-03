@@ -1,33 +1,32 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
-import json,pytz
-from time import sleep
-import  pytz, json
+
 from datetime import date, datetime, timedelta, time
+
+import json
+import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from diners.models import AccessLog
-from django.views.decorators.csrf import csrf_exempt
-from django.core.paginator import Paginator
 from django.db.models import Max, Min
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
-from .models import AccessLog, Diner, ElementToEvaluate, SatisfactionRating
 from cloudkitchen.settings.base import PAGE_TITLE
+from .models import AccessLog, Diner, ElementToEvaluate, SatisfactionRating
 
 
 class Logic(object):
     """
-    Auxiliar Functions to views logic
+    Auxiliary Functions to views logic
     TODO: assign a good name to the class
     """
     def __init__(self):
         self.tz = pytz.timezone('America/Mexico_City')
         super(Logic, self).__init__()
-        
-    def get_name_day(self, datetime_now):
+
+    @staticmethod
+    def get_name_day(datetime_now):
         days_list = {
             'MONDAY': 'Lunes',
             'TUESDAY': 'Martes',
@@ -45,14 +44,6 @@ class Logic(object):
             'Lunes': 0, 'Martes': 1, 'Miércoles': 2, 'Jueves': 3, 'Viernes': 4, 'Sábado': 5, 'Domingo': 6,
         }
         return days[self.get_name_day(dt)]
-
-    def get_start_week_day(self, day):
-        format = "%w"
-        number_day = int(self.naive_to_datetime(day).strftime(format))
-        if number_day ==  0:
-            number_day = 7
-        else:
-            day = self.naive_to_datetime(day) - timedelta(days=number_day-1)
 
     def start_datetime(self, back_days):
         start_date = date.today() - timedelta(days=back_days) 
@@ -144,7 +135,6 @@ def satisfaction_rating(request):
                 new_satisfaction_rating.save()
             return JsonResponse({'status':'ready'})
 
-
     template = 'satisfaction_rating.html'
     title = 'Rating'
     elements = ElementToEvaluate.objects.all()
@@ -163,7 +153,6 @@ def analytics(request):
     all_elements = ElementToEvaluate.objects.all()
 
     def get_dates_range():
-
         """
         Returns a JSON with a years list.
         The years list contains years objects that contains a weeks list

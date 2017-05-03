@@ -3,7 +3,7 @@
 
 # libraries to creating and executing simple grammars
 # ------------------------------------------------
-pyparsing==2.1.10
+pyparsing==2.2.0
 
 # Python interface to Graphviz's Dot
 # ------------------------------------------------
