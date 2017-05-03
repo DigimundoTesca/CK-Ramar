@@ -3,4 +3,4 @@
 
 # Your custom requirements go here
 # -----------------------------------------------------------------------------
-django-debug-toolbar
+django-debug-toolbar==1.7

@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from cloudkitchen.settings.base import PAGE_TITLE
+from helpers import Helper
 from .models import AccessLog, Diner, ElementToEvaluate, SatisfactionRating
 
 
@@ -66,10 +67,23 @@ class Logic(object):
             new_date = datetime.combine(d, t)
             return self.tz.localize(new_date)
 
+    @staticmethod
+    def get_access_logs_today():
+        helper = Helper()
+        year = int(datetime.now().year)
+        month = int(datetime.now().month)
+        day = int(datetime.now().day)
+        initial_date = helper.naive_to_datetime(date(year, month, day))
+        final_date = helper.naive_to_datetime(initial_date + timedelta(days=1))
+        return AccessLog.objects.filter(access_to_room__range=(initial_date, final_date)).order_by(
+            '-access_to_room')
+
 
 # ------------------------- Django Views ----------------------------- #
 @csrf_exempt
 def RFID(request):
+    logic = Logic()
+    helper = Helper()
     if request.method == 'POST':
         rfid = str(request.body).split('"')[3].replace(" ", "")
         if settings.DEBUG:
@@ -80,7 +94,7 @@ def RFID(request):
                 print('no se recibio rfid')
             return HttpResponse('No se recibió RFID\n')
         else:
-            access_logs = get_access_logs_today()
+            access_logs = logic.get_access_logs_today()
             exists = False
             
             for log in access_logs:
@@ -149,6 +163,7 @@ def satisfaction_rating(request):
 @login_required(login_url='users:login')
 def analytics(request):
     logic = Logic()
+    helper = Helper()
     all_suggestions = SatisfactionRating.objects.all()
     all_elements = ElementToEvaluate.objects.all()
 
@@ -175,14 +190,16 @@ def analytics(request):
             }
 
             ratings_per_year = all_suggestions.filter(
-                creation_date__range=[logic.naive_to_datetime(date(max_year,1,1)),logic.naive_to_datetime(date(max_year,12,31))])
+                creation_date__range=[
+                    logic.naive_to_datetime(date(max_year, 1, 1)),
+                    logic.naive_to_datetime(date(max_year, 12, 31))])
+
             for rating in ratings_per_year:
                 if len(year_object['weeks_list']) == 0: 
                     """
                     Creates a new week_object in the weeks_list of the actual year_object
                     """
-                    start_week_day = logic.get_start_week_day(rating.creation_date.date())
-                    week_object = { 
+                    week_object = {
                         'week_number': rating.creation_date.isocalendar()[1],
                         'start_date': rating.creation_date.date().strftime("%d-%m-%Y"),
                         'end_date': rating.creation_date.date().strftime("%d-%m-%Y"),

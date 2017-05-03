@@ -17,7 +17,8 @@ class Helper(object):
         }
         super(Helper, self)._init_()
 
-    def naive_to_datetime(self, nd):
+    @staticmethod
+    def naive_to_datetime(nd):
         if type(nd) == datetime:
             if nd.tzinfo is not None and nd.tzinfo.utcoffset(nd) is not None:  # Is Aware
                 return nd
