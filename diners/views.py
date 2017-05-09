@@ -239,6 +239,8 @@ def analytics(request):
                         year_object['weeks_list'].append(week_object)
 
                     #End else
+            # End While
+            year_object['weeks_list'].reverse()
             years_list.append(year_object)
             max_year -= 1
         # End while

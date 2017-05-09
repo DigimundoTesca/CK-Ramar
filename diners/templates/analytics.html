@@ -76,6 +76,7 @@
     let ctx_week_suggestions = document.getElementById("canvas-week-suggestions");
     let ctx_reactions = []; // sugestions elements charts (DOM)
     let elements_charts = []; // // sugestions elements charts (Chart Objects)
+    let todayDateObject = new Date();
     let today_date;
     let suggestions_week_chart;
 
@@ -126,7 +127,6 @@
           // swal.enableLoading();
         },
         success: function(result) {
-          console.log($('#bounce-cont'))
           $('#bounce-cont').hide('900');
 
           for(let i = 0; i < {{ total_elements }}; i++){
@@ -241,6 +241,9 @@
       }
     });
 
+    /**
+     * Draws the Doughnuts Charts
+     */
     for (let i = 0; i < {{ total_elements }}; i++) {
       let data = [];
       for(let j = 0; j < 4; j++) {
@@ -333,7 +336,7 @@
         if (dates_range[index].year ==  selected_year) {
           $.each(dates_range[index].weeks_list, function(index, item) {
             $('#dates-range-form').find('#dt-week').append(
-              `<option value=${item.start_date},${item.end_date}> Semana ${item.week_number}:${convert_date_to_str(item.start_date)} - ${convert_date_to_str(item.end_date)}\n</option>`
+              `<option value=${item.start_date},${item.end_date}> Semana ${item.week_number}: ${convert_date_to_str(item.start_date)} - ${convert_date_to_str(item.end_date)}\n</option>`
             );
           });
           return false;
@@ -341,7 +344,12 @@
       });
       today_date = $('#dt-week').val().split(',')[1];
     }
+
     fill_dates_range_form();
+    /**
+     * Sets the doughnuts charts for today
+     */
+    today_date = todayDateObject.getDate() + '-' + (todayDateObject.getMonth() + 1) + '-' + todayDateObject.getFullYear();
     set_reactions_day_chart(today_date)
    });
 
