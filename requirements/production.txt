@@ -8,6 +8,10 @@
 # ------------------------------------------------
 psycopg2==2.6.1
 
+# Python-MySQL Database Adapter
+# ------------------------------------------------
+MySQL-python==1.2.5
+
 # Python WSGI HTTP Server for UNIX
 gunicorn==19.7.1
 

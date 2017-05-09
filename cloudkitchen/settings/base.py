@@ -37,7 +37,6 @@ THIRD_APPS = [
     'rest_framework',
     'fcm',
     'django_extensions',
-    'debug_toolbar',
 ]
 
 USER_APPS = [

@@ -1,11 +1,13 @@
-{% extends 'base/base_nav_footer.html' %} {% load static %} {% block content %}
+{% extends 'base/base_nav_footer.html' %}
+{% load static %}
+{% block content %}
 <div class="container-fluid analytics-container">
   <div class="row">
     <div class="col-xs-12">
       <div class="text-xs-right mb-2">
         <form class="form-inline" id="dates-range-form">
-          <select class="custom-select" id="dt-year"></select>
-          <select class="custom-select" id="dt-week"></select>
+          <select class="custom-select" id="dt-year" title="dt-year"></select>
+          <select class="custom-select" id="dt-week" title="dt-week"></select>
         </form>
       </div>
     </div>
@@ -52,14 +54,20 @@
       </div>
     </div>  
   </div>
-  <div class="row">
-
+</div>
+<div id="bounce-cont">
+  <span class="msg-bounce">Generando Gráficas</span>
+  <div class="sk-double-bounce">
+    <div class="sk-child sk-double-bounce1"></div>
+    <div class="sk-child sk-double-bounce2"></div>
   </div>
 </div>
-{% endblock %} {% block javascript %}
+{% endblock %}
+
+{% block javascript %}
 <script src="{% static 'js/Chart.bundle.min.js' %}" defer></script>
 
-<script type="text/javascript" charset="utf-8" async>
+<script type="text/javascript" charset="utf-8" defer>
   $(function() {
     
     let dates_range = JSON.parse('{{ dates_range | safe }}');
@@ -75,18 +83,18 @@
       elements_to_evaluate.push({
         'id': '{{ element.id }}',
         'name': '{{ element.element }}',
-      })
+      });
     {% endfor %}
 
-    for (var i = 0; i < {{ total_elements }}; i++) {
+    for (let i = 0; i < {{ total_elements }}; i++) {
       let element_id = elements_to_evaluate[i].id;
       element_id = "canvas-element-" + element_id;
       ctx_reactions.push(document.getElementById(element_id));
     }
     
     function get_suggestions_week_list() {
-      var suggestions_list = [];
-      var count = 0;
+      let suggestions_list = [];
+      let count = 0;
 
       while (count < suggestions_week.length) {
         suggestions_list.push(parseFloat(suggestions_week[count].total_suggestions));
@@ -118,19 +126,22 @@
           // swal.enableLoading();
         },
         success: function(result) {
-          for(var i = 0; i < {{ total_elements }}; i++){
+          console.log($('#bounce-cont'))
+          $('#bounce-cont').hide('900');
+
+          for(let i = 0; i < {{ total_elements }}; i++){
             let is_empty = true;
             /**
              * Sets the doughnuts with the new values
              */
-            for(var j = 0; j < 4; j++){
+            for(let j = 0; j < 4; j++){
               elements_charts[i].data.datasets[0].data[j] = result[i].reactions[j].quantity;
             }
 
             /**
              * Validates the charts and change them if any of these do not have doesn't have values
              */
-            for(var j = 0; j < 4; j++){
+            for(let j = 0; j < 4; j++){
               if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
                 is_empty = false;
               }
@@ -138,22 +149,18 @@
             if(is_empty) {
               elements_charts[i].config.options.tooltips.callbacks.label = function () {
                 return ' Sin reacciones';
-              }
+              };
               elements_charts[i].config.data.datasets[0].data[4] = 1;
             } else {
               elements_charts[i].config.options.tooltips.callbacks.label = function(tooltipItem, data) {
-                var dataLabel = data.labels[tooltipItem.index];
-                var value = ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-
-                dataLabel += value;
+                let dataLabel = data.labels[tooltipItem.index];
+                dataLabel += ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                 return dataLabel;
               };
               elements_charts[i].config.data.datasets[0].data.splice(4,1);
             }
             elements_charts[i].update();
           }
-
-
           swal({
             title: "Éxito",
             text: "Gráfica generada",
@@ -161,7 +168,8 @@
             timer: 1000,
             showConfirmButton: false
           }).then(
-          function(){},
+          function(){
+          },
           function(dismiss){}
           );
         },
@@ -206,12 +214,12 @@
         responsive: true,
         onClick: function(event, legendItem) {
           try {
-            var selected_day = legendItem[0]._index;
-            for (var i = 0; i < suggestions_week.length; i++) {
+            let selected_day = legendItem[0]._index;
+            for (let i = 0; i < suggestions_week.length; i++) {
               if (suggestions_week[i].number_day == selected_day) {
                 set_reactions_day_chart(suggestions_week[i].date);
               }
-            };
+            }
           } catch (error) {
             console.log(error.message);
           }
@@ -233,9 +241,9 @@
       }
     });
 
-    for (var i = 0; i < {{ total_elements }}; i++) {
+    for (let i = 0; i < {{ total_elements }}; i++) {
       let data = [];
-      for(var j = 0; j < 4; j++) {
+      for(let j = 0; j < 4; j++) {
         data[j] = parseInt(Math.random() * 100  );
       }
       elements_charts[i] = new Chart(ctx_reactions[i], {
@@ -292,29 +300,27 @@
      * Returns an hour converted into 24-hours format: hh:mm ith Timezone +06:00
      */
     function convert_datetime_to_hour(original_datetime){
-      hour_formated = original_datetime.split('T')[1].split('.')[0].substr(0,5);
-      return hour_formated;
+      return original_datetime.split('T')[1].split('.')[0].substr(0, 5);
     }
 
     /**
      * Returns the text to show in the weeks select
      */
     function convert_date_to_str(date) {
-      months = {
+      let months = {
         1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 5: 'May', 6: 'Jun',
-        7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic', 
-      }
-      date = date.split('-')
-      fdate = date[0] + " " + months[parseInt(date[1])] + " " + date[2];
-      return fdate;
+        7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic',
+      };
+      date = date.split('-');
+      return date[0] + " " + months[parseInt(date[1])] + " " + date[2];
     }
     
     /** 
      * Fills the weeks select
      */
     function fill_dates_range_form() {
-      var dates_range_form = $(this).find('#dt-year');
-      var selected_year;
+      let dates_range_form = $(this).find('#dt-year');
+      let selected_year;
       $.each(dates_range, function(index, item) {
          $('#dates-range-form').find('#dt-year').append(
             "<option value=" + item.year + ">" + item.year + "</option>"
@@ -325,13 +331,9 @@
       
       $.each(dates_range, function(index, item) {
         if (dates_range[index].year ==  selected_year) {
-          $.each(dates_range[index].weeks_list, function(index, item) { 
+          $.each(dates_range[index].weeks_list, function(index, item) {
             $('#dates-range-form').find('#dt-week').append(
-              "<option value=" + item.start_date + "," + item.end_date + ">" + 
-              "Semana " + item.week_number + ": " + 
-              convert_date_to_str(item.start_date) +
-              " - " + convert_date_to_str(item.end_date) +
-              "</option>"
+              `<option value=${item.start_date},${item.end_date}> Semana ${item.week_number}:${convert_date_to_str(item.start_date)} - ${convert_date_to_str(item.end_date)}\n</option>`
             );
           });
           return false;
@@ -341,7 +343,6 @@
     }
     fill_dates_range_form();
     set_reactions_day_chart(today_date)
-
    });
 
  </script>

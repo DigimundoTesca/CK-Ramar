@@ -1,7 +1,5 @@
 from cloudkitchen.settings.dev import *
 
-DEBUG = True
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -10,10 +8,7 @@ DATABASES = {
         'PASSWORD': os.getenv('RAMAR_DB_PASSWORD'),
         'HOST': os.getenv('RAMAR_DB_HOST'),
         'PORT': os.getenv('RAMAR_DB_PORT'),
+        'OPTIONS': {
+        }  
     }
-}
-
-GRAPH_MODELS = {
-  'all_applications': True,
-  'group_models': True,
 }
