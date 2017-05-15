@@ -97,10 +97,11 @@
        */
       for (let i = 0; i < emoji_level.length; i++) {
         if (emoji_level[i].search('emoji-lv') >= 0) {
+          console.log(emoji_level);
           emoji_level = emoji_level[i].split('-')[2];
           data['satisfaction_rating'] = emoji_level;
-        };
-      };
+        }
+      }
 
       if (emoji_level == 1) {
         $('.rating-footer-title').text('¿Qué salió mal?');

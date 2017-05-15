@@ -129,25 +129,27 @@ def RFID(request):
 def satisfaction_rating(request):
     if request.method == 'POST':
         if request.POST['type'] == 'satisfaction_rating':
-            satisfaction_rating = request.POST['satisfaction_rating']
+            satisfaction_rating_value = request.POST['satisfaction_rating']
+            if int(satisfaction_rating_value) > 4:
+                satisfaction_rating_value = 4
             elements_list = json.loads(request.POST['elements_id'])
 
             if request.POST['suggestion']:
                 new_satisfaction_rating = SatisfactionRating.objects.create(
-                    satisfaction_rating=satisfaction_rating,
+                    satisfaction_rating=satisfaction_rating_value,
                     suggestion=request.POST['suggestion'],
                 )
             else:
                 new_satisfaction_rating = SatisfactionRating.objects.create(
-                    satisfaction_rating=satisfaction_rating
+                    satisfaction_rating=satisfaction_rating_value
                 )
-            new_satisfaction_rating.save();
+            new_satisfaction_rating.save()
 
             for element in elements_list:
                 new_element = ElementToEvaluate.objects.get(id=element)
                 new_satisfaction_rating.elements.add(new_element)
                 new_satisfaction_rating.save()
-            return JsonResponse({'status':'ready'})
+            return JsonResponse({'status': 'ready'})
 
     template = 'satisfaction_rating.html'
     title = 'Rating'
@@ -157,13 +159,12 @@ def satisfaction_rating(request):
         'page_title': title,
         'elements': elements,
     }
-    return render (request, template, context)
+    return render(request, template, context)
 
 
 @login_required(login_url='users:login')
 def analytics(request):
     logic = Logic()
-    helper = Helper()
     all_suggestions = SatisfactionRating.objects.all()
     all_elements = ElementToEvaluate.objects.all()
 
@@ -282,7 +283,7 @@ def analytics(request):
 
         return json.dumps(week_suggestions_list)
 
-    def  get_suggestions(initial_date, final_date):
+    def get_suggestions(initial_date, final_date):
         return all_suggestions.filter(
                 creation_date__range=(initial_date, final_date)).order_by('-creation_date')
 
@@ -298,10 +299,10 @@ def analytics(request):
                     'id': element_to_evaluate.id,
                     'name': element_to_evaluate.element,
                     'reactions': {
-                        0:{'reaction':'Enojado', 'quantity': 0},
-                        1:{'reaction':'Triste', 'quantity': 0},
-                        2:{'reaction':'Feliz', 'quantity': 0},
-                        3:{'reaction':'Encantado', 'quantity': 0},
+                        0: {'reaction': 'Enojado', 'quantity': 0},
+                        1: {'reaction': 'Triste', 'quantity': 0},
+                        2: {'reaction': 'Feliz', 'quantity': 0},
+                        3: {'reaction': 'Encantado', 'quantity': 0},
                     },
                 }
                 for suggestion in today_suggestions:
@@ -318,7 +319,7 @@ def analytics(request):
         'title': PAGE_TITLE + ' | ' + title,
         'page_title': title,
         'dates_range': get_dates_range(),
-        'suggestions_week':get_suggestions_actual_week(),
+        'suggestions_week': get_suggestions_actual_week(),
         'elements': all_elements,
         'total_elements': all_elements.count(),
     }
