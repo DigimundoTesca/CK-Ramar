@@ -41,7 +41,7 @@ class ElementToEvaluate(models.Model):
 
 class SatisfactionRating(models.Model):
     elements = models.ManyToManyField(ElementToEvaluate)
-    satisfaction_rating = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(5)])
+    satisfaction_rating = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(4)])
     creation_date = models.DateTimeField(auto_now_add=True)
     suggestion = models.TextField(blank=True, null=True)
 
