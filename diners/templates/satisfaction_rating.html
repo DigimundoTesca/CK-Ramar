@@ -257,7 +257,7 @@
           }).then(
             function() {},
             function(dismiss) {
-              location.reload();
+              window.location = "{% url 'diners:satisfaction_rating' %}";
             }
           );
           $('#btn-writte-commentary').attr('disabled', true);
