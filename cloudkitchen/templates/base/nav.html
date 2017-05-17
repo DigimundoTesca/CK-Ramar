@@ -2,24 +2,18 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'users:login' %}"><h3>{{ page_title }}</h3></a>
     <ul class="nav navbar-nav float-xs-right">
-      <!--
       <li class="nav-item dropdown" id="link-diners">
-        <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Comedor</a>
+        <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Analytics</a>
         <div class="dropdown-menu" aria-labelledby="supportedContentDropdown">
-          <a class="dropdown-item" href="{% url 'diners:diners' %}">Accesos de hoy</a>
-          <a class="dropdown-item" href="{% url 'diners:diners_logs' %}">Historial de Accesos</a>
+          <a class="dropdown-item" href="{% url 'diners:analytics' %}">Analytics</a>
+          <a class="dropdown-item" href="{% url 'diners:suggestions' %}">Comentarios</a>
         </div>
       </li>
-      -->
       <li class="nav-item dropdown" id="link-diners">
-        <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Satisfacción</a>
-        <div class="dropdown-menu" aria-labelledby="supportedContentDropdown">
-          <a class="dropdown-item" href="{% url 'diners:satisfaction_rating' %}">Calificador</a>
-          <a class="dropdown-item" href="{% url 'diners:analytics' %}">Rating</a>
-        </div>
+        <a class="nav-link" href="{% url 'diners:satisfaction_rating' %}">Calificador</a>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
+        <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>        
         <div class="dropdown-menu" aria-labelledby="supportedContentDropdown">
           {% if user.is_superuser %}
           <a class="dropdown-item" href="{% url 'admin:login' %}">Panel de Control</a>

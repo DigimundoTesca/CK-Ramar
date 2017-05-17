@@ -1,134 +1,187 @@
 {% extends 'base/base_nav_footer.html' %}
 {% load static %}
-
 {% block content %}
 <div class="container-fluid analytics-container">
   <div class="row">
+    <div class="col-xs-12">
+      <div class="text-xs-right mb-2">
+        <form class="form-inline" id="dates-range-form">
+          <select class="custom-select" id="dt-year" title="dt-year"></select>
+          <select class="custom-select" id="dt-week" title="dt-week"></select>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-xs-12 charts-container">
-      <h3>Participación</h3>
-      <div class="col-xs-12"> 
-        <div class="col-xs-12 col-md-6 week-suggestions-chart">
+      <div class="col-xs-12">
+        <div class="col-xs-12 col-lg-6 col-xl-5 mb-3 week-suggestions-chart">
+          <div class="col-xs-12">
+            <h3>Comentarios hechos</h3>
+          </div>
           <div class="canvas-holder">
             <canvas id="canvas-week-suggestions"></canvas>
           </div>
         </div>
-        <div class="col-xs-12 col-md-6 elements-analytics-container">
-          <div class="col-xs-12">
-            <h3>Gráficas de elementos</h3>
+        <div class="col-xs-12 col-lg-6 col-xl-7 mb-3 elements-analytics-container">
+          <div class="row">
+            <div class="col-xs-12">
+              <h3>Reacciones de clientes</h3>
+            </div>
           </div>
-          <div class="canvas-holder doughnut-chart  col-xs-12 col-sm-6 col-lg-4 col-xl-3">
-            <canvas id="canvas-element-1"></canvas>
+          <div class="row elements-header">
+            <div class="col-xs-6 col-lg-3  element-name-cont">
+              <span class="element-name element-red">Enojado</span>
+            </div>
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-yellow">Triste</span>
+            </div>
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-blue">Alegre</span>
+            </div>
+            <div class="col-xs-6 col-lg-3 element-name-cont">
+              <span class="element-name element-green">Encantado</span>
+            </div>
           </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-lg-4 col-xl-3">
-            <canvas id="canvas-element-2"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-lg-4 col-xl-3">
-            <canvas id="canvas-element-3"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-lg-4 col-xl-3">
-            <canvas id="canvas-element-4"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-lg-4 col-xl-3">
-            <canvas id="canvas-element-5"></canvas>
-          </div>
-          <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-lg-4 col-xl-3">
-            <canvas id="canvas-element-6"></canvas>
+          <div class="charts-container row mt-2">
+            {% for element in elements %}
+              <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4 col-xl-3 mb-3">
+                <canvas id="canvas-element-{{element.id}}"></canvas>
+              </div>
+            {% endfor %}
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12 suggestions-container">
-      <h3>Comentarios</h3>
-      <div class="col-xs-12 card card-scroll suggestions-table">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Reaccion</th>
-              <th>Comentario</th>
-              <th>Elementos Evaluados</th>
-              <th>Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for test in tests %}
-            {% if test.suggestion %}
-            <tr>
-              <td>
-                {% if test.satisfaction_rating == 1 %}
-                <img src="{% static 'images/Very_Angry_Emoji.png' %}" alt="Product image" height="80" >
-                {% elif test.satisfaction_rating == 2 %}
-                <img src="{% static 'images/Very_sad_emoji_icon_png.png' %}" alt="Product image" height="80" >
-                {% elif test.satisfaction_rating == 3 %}
-                <img src="{% static 'images/Smiling_Emoji_with_Smiling_Eyes.png' %}" alt="Product image" height="80" >
-                {% elif test.satisfaction_rating == 4 %}
-                <img src="{% static 'images/Heart_Eyes_Emoji.png' %}" alt="Product image" height="80" >
-                {% endif %}
-              </td>
-              <td>{{ test.suggestion }}</td>
-              <td>
-                {% if test.satisfaction_rating == 1 %}
-                {% for element in test.elements.all %}
-                <div class="badge badge-emotion badge-emotion-1">
-                  {{ element }} 
-                </div>
-                {% endfor %}
-                {% elif test.satisfaction_rating == 2 %}
-                {% for element in test.elements.all %}
-                <div class="badge badge-emotion badge-emotion-2">
-                  {{ element }} 
-                </div>
-                {% endfor %}
-                {% elif test.satisfaction_rating == 3 %}
-                {% for element in test.elements.all %}
-                <div class="badge badge-emotion badge-emotion-3">
-                  {{ element }} 
-                </div>
-                {% endfor %}
-                {% elif test.satisfaction_rating == 4 %}
-                {% for element in test.elements.all %}
-                <div class="badge badge-emotion badge-emotion-4">
-                  {{ element }} 
-                </div>
-                {% endfor %}
-                {% endif %}
-              </td>
-              <td>{{ test.creation_date }}</td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    </div>  
   </div>
 </div>
-{% endblock %} 
+<div id="bounce-cont">
+  <span class="msg-bounce">Generando Gráficas</span>
+  <div class="sk-double-bounce">
+    <div class="sk-child sk-double-bounce1"></div>
+    <div class="sk-child sk-double-bounce2"></div>
+  </div>
+</div>
+{% endblock %}
 
 {% block javascript %}
 <script src="{% static 'js/Chart.bundle.min.js' %}" defer></script>
 
-<script type="text/javascript" charset="utf-8" async>
+<script type="text/javascript" charset="utf-8" defer>
   $(function() {
-    let ctx_week_suggestions = document.getElementById("canvas-week-suggestions"),
-        ctx_element_1 = document.getElementById("canvas-element-1"),
-        ctx_element_2 = document.getElementById("canvas-element-2"),
-        ctx_element_3 = document.getElementById("canvas-element-3"),
-        ctx_element_4 = document.getElementById("canvas-element-4"),
-        ctx_element_5 = document.getElementById("canvas-element-5"),
-        ctx_element_6 = document.getElementById("canvas-element-6");
+    
+    let dates_range = JSON.parse('{{ dates_range | safe }}');
+    let suggestions_week = JSON.parse('{{ suggestions_week | safe }}');
+    let elements_to_evaluate = []; // Reactions data
+    let ctx_week_suggestions = document.getElementById("canvas-week-suggestions");
+    let ctx_reactions = []; // sugestions elements charts (DOM)
+    let elements_charts = []; // // sugestions elements charts (Chart Objects)
+    let todayDateObject = new Date();
+    let today_date;
+    let suggestions_week_chart;
 
-    let suggestions_week_chart,
-        element_chart_1,
-        element_chart_2,
-        element_chart_3,
-        element_chart_4,
-        element_chart_5,
-        element_chart_6;
+    {% for element in elements %}
+      elements_to_evaluate.push({
+        'id': '{{ element.id }}',
+        'name': '{{ element.element }}',
+      });
+    {% endfor %}
+
+    for (let i = 0; i < {{ total_elements }}; i++) {
+      let element_id = elements_to_evaluate[i].id;
+      element_id = "canvas-element-" + element_id;
+      ctx_reactions.push(document.getElementById(element_id));
+    }
+    
+    function get_suggestions_week_list() {
+      let suggestions_list = [];
+      let count = 0;
+
+      while (count < suggestions_week.length) {
+        suggestions_list.push(parseFloat(suggestions_week[count].total_suggestions));
+        count++;
+      }
+      return suggestions_list;
+    }
+
+    /*
+     * Get's the suggestions of the selected day in week chart and
+     * show the results in reactions day chart
+     */
+    function set_reactions_day_chart(date) {
+      $.ajax({
+        url: "{% url 'diners:analytics' %}",
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          'date': date,
+          'type': 'reactions_day',
+        },
+        traditional: true,
+        datatype: 'jsonp',
+        beforeSend: function(){
+          // swal({
+          //     title: "Generando gráficas",
+          //     text: "Espere mientras se calculan los datos",
+          //   });
+          // swal.enableLoading();
+        },
+        success: function(result) {
+          $('#bounce-cont').hide('900');
+
+          for(let i = 0; i < {{ total_elements }}; i++){
+            let is_empty = true;
+            /**
+             * Sets the doughnuts with the new values
+             */
+            for(let j = 0; j < 4; j++){
+              elements_charts[i].data.datasets[0].data[j] = result[i].reactions[j].quantity;
+            }
+
+            /**
+             * Validates the charts and change them if any of these do not have doesn't have values
+             */
+            for(let j = 0; j < 4; j++){
+              if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
+                is_empty = false;
+              }
+            }
+            if(is_empty) {
+              elements_charts[i].config.options.tooltips.callbacks.label = function () {
+                return ' Sin reacciones';
+              };
+              elements_charts[i].config.data.datasets[0].data[4] = 1;
+            } else {
+              elements_charts[i].config.options.tooltips.callbacks.label = function(tooltipItem, data) {
+                let dataLabel = data.labels[tooltipItem.index];
+                dataLabel += ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                return dataLabel;
+              };
+              elements_charts[i].config.data.datasets[0].data.splice(4,1);
+            }
+            elements_charts[i].update();
+          }
+          swal({
+            title: "Éxito",
+            text: "Gráfica generada",
+            type: "success",
+            timer: 1000,
+            showConfirmButton: false
+          }).then(
+          function(){
+          },
+          function(dismiss){}
+          );
+        },
+
+        error: function(result, jqXHR, textStatus, errorThrown) {
+          console.log(result);
+        },
+      });
+    }
 
     /**
-     * Draws the chart of suggestions of the day
+     * Draws the chart of reactions of the day
      */
     suggestions_week_chart = new Chart(ctx_week_suggestions, {
       type: 'bar',
@@ -136,24 +189,24 @@
         labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"],
         datasets: [{
           label: 'Comentarios del día',
-          data: [10,50,20,32,12,34,187],
+          data: get_suggestions_week_list(),
           backgroundColor: [
-          'rgba(241,196,15,0.7)',
-          'rgba(230,126,34,0.7)',
-          'rgba(231,76,60,0.7)',
-          'rgba(26,188,156,0.7)',
-          'rgba(46,204,113,0.7)',
-          'rgba(52,152,219,0.7)',
-          'rgba(52,73,94,0.7)',
+          'rgba(26, 188, 156,1.0)',
+          'rgba(46, 204, 113, 1.0)',
+          'rgba(52, 152, 219,1.0)',
+          'rgba(52, 73, 94,1.0)',
+          'rgba(241, 196, 15,1.0)',
+          'rgba(230, 126, 34,1.0)',
+          'rgba(231, 76, 60,1.0)',
           ],
           borderColor: [
-          'rgba(241,196,15,0.9)',
-          'rgba(230,126,34,0.9)',
-          'rgba(231,76,60,0.9)',
-          'rgba(26,188,156,0.9)',
-          'rgba(46,204,113,0.9)',
-          'rgba(52,152,219,0.9)',
-          'rgba(52,73,94,0.9)',
+          'rgba(26, 188, 156,1.0)',
+          'rgba(46, 204, 113, 1.0)',
+          'rgba(52, 152, 219,1.0)',
+          'rgba(52, 73, 94,1.0)',
+          'rgba(241, 196, 15,1.0)',
+          'rgba(230, 126, 34,1.0)',
+          'rgba(231, 76, 60,1.0)',
           ],
         }]
       },
@@ -161,6 +214,12 @@
         responsive: true,
         onClick: function(event, legendItem) {
           try {
+            let selected_day = legendItem[0]._index;
+            for (let i = 0; i < suggestions_week.length; i++) {
+              if (suggestions_week[i].number_day == selected_day) {
+                set_reactions_day_chart(suggestions_week[i].date);
+              }
+            }
           } catch (error) {
             console.log(error.message);
           }
@@ -174,7 +233,7 @@
         },
         title: {
           display: true,
-          text: 'Comentairos del día',
+          text: 'Comentarios del día',
         },
         legend: {
           display: false,
@@ -182,243 +241,231 @@
       }
     });
 
-
-    element_chart_1 = new Chart(ctx_element_1, {
-      type: 'doughnut',
-      data: {
-        labels: [
+    /**
+     * Draws the Doughnuts Charts
+     */
+    for (let i = 0; i < {{ total_elements }}; i++) {
+      let data = [];
+      for(let j = 0; j < 4; j++) {
+        data[j] = parseInt(Math.random() * 100  );
+      }
+      elements_charts[i] = new Chart(ctx_reactions[i], {
+        type: 'doughnut',
+        data: {
+          labels: [
           "Enojado",
           "Triste",
-          "Contento",
-          "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100,40],
-          backgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784",
+          "Alegre",
+          "Encantado",
+          "Sin Reacciones",
           ],
-          hoverBackgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784"
-          ]}]
-      },
-      options: {
-        responsive: true,
-        animation:{
-            animateScale:true
+          datasets: [{
+            data: [0,0,0,0,0],
+            backgroundColor: [
+            "#FF5252",
+            "#FFC400",
+            "#2979FF",
+            "#00E676",
+            ],
+            hoverBackgroundColor: [
+            "#FF5252",
+            "#FFC400",
+            "#2979FF",
+            "#00E676"
+            ],
+          }],
         },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
+        options: {
+          cutoutPercentage: 50,
+          // rotation: 50,
+          // circumference: 5,
+          // animation.animateScale: true,
+          // animation: {
+          //   animateScale: true,
+          // },
+          responsive: true,
+          animation: {
+            animateScale: true
+          },
+          title: {
+            display: true,
+            text: elements_to_evaluate[i].name,
+          },
+          legend: {
             display: false,
+          },
         },
-      },
+      });
+    }
+
+    /**
+     * Receives a datetime with format from python.
+     * Returns an hour converted into 24-hours format: hh:mm ith Timezone +06:00
+     */
+    function convert_datetime_to_hour(original_datetime){
+      return original_datetime.split('T')[1].split('.')[0].substr(0, 5);
+    }
+
+    /**
+     * Returns the text to show in the weeks select
+     */
+    function convert_date_to_str(date) {
+      let months = {
+        1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 5: 'May', 6: 'Jun',
+        7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic',
+      };
+      date = date.split('-');
+      return date[0] + " " + months[parseInt(date[1])] + " " + date[2];
+    }
+
+    /** 
+     * Refresh the page with de dates of the year and week selected
+     */
+    $(this).on('change', '#dt-week', function(event) {
+      dt_year = $('#dt-year').val();
+      dt_week = $('#dt-week').val();
+      
+      $.ajax({
+        url: "{% url 'diners:analytics' %}",
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          'dt_year': dt_year,
+          'dt_week': dt_week,
+          'type': 'reactions_week',
+        },
+        beforeSend: function(){
+          swal({
+            title: "Obteniendo registros",
+            text: "Espere mientras obtenemos toda la información",
+          });
+          swal.enableLoading();
+        },
+        traditional: true,
+        datatype: 'jsonp',
+        success: function(result, status, XHR) {
+          console.log(result)
+          var tickets_objects = result['tickets']
+          sales_week = result['sales']
+          var week_number = result['week_number']
+          var sales_details_table = $('#sales-details-table').find('tbody');
+          var week_earnings = 0;
+          sales_details_table.empty();
+
+          swal({
+            title: "Éxito",
+            text: "Datos obtenidos",
+            type: "info",
+            timer: 750,
+            showConfirmButton: false
+          }).then(
+          function(){},
+          function(dismiss){});
+          
+          /**
+           * Filling the sales table
+           */
+          for (var i = 0; i < tickets_objects.length; i++) {
+            week_earnings += parseFloat(tickets_objects[i].total);
+            var cartridges_list = "";
+            var packages_list = "";
+
+            for (var j = 0; j < tickets_objects[i].ticket_details['cartridges'].length; j++) {
+              cartridges_list += "" +
+              "<span class='badge badge-success'>" +
+                "<span class='badge badge-info'>" + 
+                tickets_objects[i].ticket_details['cartridges'][j].quantity +
+                "</span>" +
+                "<span class='badge badge-success'>" + 
+                tickets_objects[i].ticket_details['cartridges'][j].name +
+                "</span>" +
+              "</span>" +
+              "";
+            };
+
+            for (var j = 0; j < tickets_objects[i].ticket_details['packages'].length; j++) {
+              packages_list += "" +
+              "<span class='badge badge-primary'>" +
+                "<span class='badge badge-info'>" + 
+                tickets_objects[i].ticket_details['packages'][j].quantity +
+                "</span>" +
+                "<span class='badge badge-primary'>" + 
+                tickets_objects[i].ticket_details['packages'][j].name +
+                "</span>" +
+              "</span>" +
+              "";
+            };
+
+            sales_details_table.append("" +
+              "<tr>" +
+              "<th class='header-id'>" + tickets_objects[i].id + "</th>" +
+              "<th>" + tickets_objects[i].order_number + "</th>" +
+              "<td class='header-date'>" + tickets_objects[i].created_at + "</td>" +
+              "<td class='header-products'>" + cartridges_list + "</td>" +
+              "<td class='header-packages'>" + packages_list + "</td>" +
+              "<td>" + tickets_objects[i].seller + "</td>" +
+              "<td class='td-total'>" + tickets_objects[i].total + "</td>" +
+              "<td class='header-actions'>" + 
+              "<span class='sales-actions delete-ticket'><i class='material-icons text-muted'>delete</i></span>" +
+              "<span class='sales-actions print-ticket'><i class='material-icons text-primary'>local_printshop</i></span>" + 
+              "</td>" +
+              "</tr>" +
+            "");
+          };
+
+          /**
+           * Filling the sales chart
+           */
+          sales_week_earnings_list = get_earnings_week_range(sales_week);
+          earnings_week_chart.data.datasets[0].data = sales_week_earnings_list;
+          earnings_week_chart.update();
+
+          $('#total-earnings-text').text(week_earnings.toFixed(2))
+          $('#week-number').text(week_number)
+
+        },
+        error: function(result, jqXHR, textStatus, errorThrown) {
+          console.log(result);
+        },
+        complete: function(result){}
+      });
     });
 
-    element_chart_1 = new Chart(ctx_element_2, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          "Enojado",
-          "Triste",
-          "Contento",
-          "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100,40],
-          backgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784",
-          ],
-          hoverBackgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784"
-          ]}]
-      },
-      options: {
-        responsive: true,
-        animation:{
-            animateScale:true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-            display: false,
-        },
-      },
-    });
+    
+    /** 
+     * Fills the weeks select
+     */
+    function fill_dates_range_form() {
+      let dates_range_form = $(this).find('#dt-year');
+      let selected_year;
+      $.each(dates_range, function(index, item) {
+         $('#dates-range-form').find('#dt-year').append(
+            "<option value=" + item.year + ">" + item.year + "</option>"
+          );
+      });
 
-    element_chart_1 = new Chart(ctx_element_3, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          "Enojado",
-          "Triste",
-          "Contento",
-          "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100,40],
-          backgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784",
-          ],
-          hoverBackgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784"
-          ]}]
-      },
-      options: {
-        responsive: true,
-        animation:{
-            animateScale:true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-            display: false,
-        },
-      },
-    });
+      selected_year = $('#dates-range-form').find('#dt-year').val();
+      
+      $.each(dates_range, function(index, item) {
+        if (dates_range[index].year ==  selected_year) {
+          $.each(dates_range[index].weeks_list, function(index, item) {
+            $('#dates-range-form').find('#dt-week').append(
+              `<option value=${item.start_date},${item.end_date}> Semana ${item.week_number}: ${convert_date_to_str(item.start_date)} - ${convert_date_to_str(item.end_date)}\n</option>`
+            );
+          });
+          return false;
+        }
+      });
+      today_date = $('#dt-week').val().split(',')[1];
+    }
 
-    element_chart_1 = new Chart(ctx_element_4, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          "Enojado",
-          "Triste",
-          "Contento",
-          "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100,40],
-          backgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784",
-          ],
-          hoverBackgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784"
-          ]}]
-      },
-      options: {
-        responsive: true,
-        animation:{
-            animateScale:true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-            display: false,
-        },
-      },
-    });
+    fill_dates_range_form();
+    /**
+     * Sets the doughnuts charts for today
+     */
+    today_date = todayDateObject.getDate() + '-' + (todayDateObject.getMonth() + 1) + '-' + todayDateObject.getFullYear();
+    set_reactions_day_chart(today_date)
+   });
 
-    element_chart_1 = new Chart(ctx_element_5, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          "Enojado",
-          "Triste",
-          "Contento",
-          "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100,40],
-          backgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784",
-          ],
-          hoverBackgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784"
-          ]}]
-      },
-      options: {
-        responsive: true,
-        animation:{
-            animateScale:true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-            display: false,
-        },
-      },
-    });
-
-    element_chart_1 = new Chart(ctx_element_6, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          "Enojado",
-          "Triste",
-          "Contento",
-          "Enamorado",
-        ],
-        datasets: [{
-          data: [300, 50, 100,40],
-          backgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784",
-          ],
-          hoverBackgroundColor: [
-            "#E57373",
-            "#FFE082",
-            "#90CAF9",
-            "#81C784"
-          ]}]
-      },
-      options: {
-        responsive: true,
-        animation:{
-            animateScale:true
-        },
-        title: {
-          display: true,
-          text: 'Elemento',
-        },
-        legend: {
-            display: false,
-        },
-      },
-    });
-
-
-
-  });
-</script>
-{% endblock javascript %}
+ </script>
+ {% endblock javascript %}

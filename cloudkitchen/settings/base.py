@@ -36,6 +36,7 @@ DJANGO_APPS = [
 THIRD_APPS = [
     'rest_framework',
     'fcm',
+    'django_extensions',
 ]
 
 USER_APPS = [
@@ -53,6 +54,7 @@ AUTH_USER_MODEL = 'users.User'
 FCM_APIKEY = os.getenv('FCM_SERVER_KEY')
 
 MIDDLEWARE = [
+    'core.middlewares.HostMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middlewares.HostMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'cloudkitchen.urls'

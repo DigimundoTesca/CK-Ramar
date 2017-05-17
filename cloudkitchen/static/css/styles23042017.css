@@ -171,22 +171,66 @@ small {
 .analytics-container .suggestions-container .card {
   max-height: 40vh;
 }
+.analytics-container .week-suggestions-chart {
+  padding: 0;
+
+}
 .analytics-container .week-suggestions-chart .canvas-holder {
-  /*background: red;*/
-  /*width: 100% !important;*/
   min-height: 200px;
 }
 .analytics-container .week-suggestions-chart .canvas-holder canvas {
-  /*background: blue;*/
-  /*min-height: 20px !important;*/
   display: flex;
   height: 500px;
-  /*height: inherit;*/
+}
+.analytics-container .charts-container {
+  padding: 0;
+}
+.analytics-container .charts-container .elements-header {
+  margin: 0;
+}
+.analytics-container .charts-container .elements-header .element-name {
+  color: #fbfbfb;
+  font-weight: 600;
+  text-align: center;
+}
+.analytics-container .charts-container .element-name-cont {
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.analytics-container .charts-container .element-name-cont .element-name {
+  padding: 0.2rem;
+  font-size: 0.9rem;
+  margin: 0.2rem;
+  width: 100%;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+}
+.analytics-container .charts-container .element-name.element-red {
+  background: #FF5252;
+}
+.analytics-container .charts-container .element-name.element-yellow {
+  background: #FFC400;
+}
+.analytics-container .charts-container .element-name.element-blue {
+  background: #2979FF;
+}
+.analytics-container .charts-container .element-name.element-green {
+  background: #00E676;
 }
 .analytics-container .charts-container .elements-analytics-container {
+  overflow: hidden;
   width: 100%;
   padding: 0;
   margin: 0;
+}
+.analytics-container .charts-container .elements-analytics-container .charts-container {
+  border: 1px rgba(0,0,0,0) solid;
+  display: flex;
+  justify-content: center;
+  height: 100%;
 }
 .analytics-container .charts-container .elements-analytics-container .doughnut-chart {
   margin: 0;
@@ -354,9 +398,11 @@ small {
 }
 .container-web-logo .web-logo {
   max-height: 256px;
+  max-width: 100%;
+  padding: 2rem;
 }
 .container-web-logo .web-logo-register {
-  max-height: 196px;
+  max-height: 320px;
 }
 .container-main {
   padding-top: 0;
@@ -390,26 +436,43 @@ small {
   display: flex;
   justify-content: center;
 }
-.container-rating .emoji-container {
+.container-rating figure.emoji-container {
+  align-items: center;
   cursor: pointer;
   display: flex;
-  justify-content: center;
   height: 160px;
+  justify-content: center;
+  margin: 0 auto;
   width: 160px;
 }
-.container-rating .emoji {
-  display: block;
+.container-rating img.emoji {
+  display: flex;
   transition: all 0.3s ease;
-  height: 85%;
-  width: 85%;
+  height: 80%;
+  width: 80%;
+  opacity: 0.9;
 }
+.container-rating img.emoji.ghost {
+  transition: all 0.3s ease;
+  height: 75%;
+  width: 75%; 
+  opacity: 0.4;
+}
+.container-rating .emoji-container .emoji.selected,
 .container-rating .emoji-container .emoji:hover {
-  opacity: 0.8;
+  opacity: 1;
   height: 100%;
   width: 100%;
 }
 .container-rating .rating-footer {
   display: none;
+}
+.container-rating .rating-footer #elements-container {
+  display: flex;
+  justify-content: center;
+}
+.container-rating .rating-footer #elements-container .element-container {
+  align-self: center;
 }
 .container-rating .rating-footer .btn-option {
   white-space: normal;
@@ -1020,8 +1083,15 @@ small {
 /** 
  * Media Queries
  */
- @media (min-width: 768px) {
+@media (min-width: 768px) {
   .container-rating .rating-footer button.btn {
     font-size: 1.2em;
   }
+  .container-rating .emoji-container {
+    height: 160px;
+		width: 160px;
+	}
  }
+
+@media (min-width: 768px) {
+}

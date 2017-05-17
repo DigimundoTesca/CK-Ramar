@@ -8,13 +8,7 @@ DATABASES = {
         'PASSWORD': os.getenv('RAMAR_DB_PASSWORD'),
         'HOST': os.getenv('RAMAR_DB_HOST'),
         'PORT': os.getenv('RAMAR_DB_PORT'),
+        'OPTIONS': {
+        }  
     }
-}
-
-
-INSTALLED_APPS.append('django-extension')
-
-GRAPH_MODELS = {
-  'all_applications': True,
-  'group_models': True,
 }
