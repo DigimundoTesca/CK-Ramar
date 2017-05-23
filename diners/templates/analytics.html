@@ -104,7 +104,7 @@
       return suggestions_list;
     }
 
-    /*
+    /**
      * Get's the suggestions of the selected day in week chart and
      * show the results in reactions day chart
      */
@@ -129,49 +129,38 @@
         success: function(result) {
           $('#bounce-cont').hide('900');
 
-          for(let i = 0; i < {{ total_elements }}; i++){
+          for(let i = 0; i < {{ total_elements }}; i++) {
             let is_empty = true;
             /**
              * Sets the doughnuts with the new values
              */
-            for(let j = 0; j < 4; j++){
+            for (let j = 0; j < 4; j++) {
               elements_charts[i].data.datasets[0].data[j] = result[i].reactions[j].quantity;
             }
 
             /**
              * Validates the charts and change them if any of these do not have doesn't have values
              */
-            for(let j = 0; j < 4; j++){
+            for (let j = 0; j < 4; j++) {
               if (elements_charts[i].config.data.datasets[0].data[j] > 0) {
                 is_empty = false;
               }
             }
-            if(is_empty) {
+            if (is_empty) {
               elements_charts[i].config.options.tooltips.callbacks.label = function () {
                 return ' Sin reacciones';
               };
               elements_charts[i].config.data.datasets[0].data[4] = 1;
             } else {
-              elements_charts[i].config.options.tooltips.callbacks.label = function(tooltipItem, data) {
+              elements_charts[i].config.options.tooltips.callbacks.label = function (tooltipItem, data) {
                 let dataLabel = data.labels[tooltipItem.index];
                 dataLabel += ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                 return dataLabel;
               };
-              elements_charts[i].config.data.datasets[0].data.splice(4,1);
+              elements_charts[i].config.data.datasets[0].data.splice(4, 1);
             }
             elements_charts[i].update();
           }
-          swal({
-            title: "Éxito",
-            text: "Gráfica generada",
-            type: "success",
-            timer: 1000,
-            showConfirmButton: false
-          }).then(
-          function(){
-          },
-          function(dismiss){}
-          );
         },
 
         error: function(result, jqXHR, textStatus, errorThrown) {
