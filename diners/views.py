@@ -323,7 +323,7 @@ def analytics(request):
         'elements': all_elements,
         'total_elements': all_elements.count(),
     }
-    return render (request, template, context)
+    return render(request, template, context)
 
 
 @login_required(login_url='users:login')
@@ -338,7 +338,7 @@ def suggestions(request):
         # 'ratings': ratings,
         'tests': tests,
     }
-    return render (request, template, context)
+    return render(request, template, context)
 
 
 # --------------------------- TEST ------------------------
