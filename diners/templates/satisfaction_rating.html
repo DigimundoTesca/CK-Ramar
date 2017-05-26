@@ -41,7 +41,7 @@
       </div>
       <div class="row mt-1 hidden">
         <div class="col-xs-12">
-          <button id="btn-writte-commentary" class="btn btn-block btn-outline-primary btn-text-close">
+          <button id="btn-write-commentary" class="btn btn-block btn-outline-primary btn-text-close">
             <span class="btn-text">Escribir un comentario</span>
             <span class="icon-container">
               <i class="material-icons">keyboard_arrow_down</i>
@@ -91,50 +91,49 @@
       emojis.addClass('ghost');
       let emoji_level = emoji.attr('class').split(' ');
       emoji.find('.emoji').addClass('selected');
-
+      let rating_footel_title = $('.rating-footer-title');
       /**
        * Gets the emoji level
        */
       for (let i = 0; i < emoji_level.length; i++) {
         if (emoji_level[i].search('emoji-lv') >= 0) {
-          console.log(emoji_level);
-          emoji_level = emoji_level[i].split('-')[2];
+          emoji_level = parseInt(emoji_level[i].split('-')[2]);
           data['satisfaction_rating'] = emoji_level;
         }
       }
 
-      if (emoji_level == 1) {
-        $('.rating-footer-title').text('¿Qué salió mal?');
+      if (emoji_level === 1) {
+        rating_footel_title.text('¿Qué salió mal?');
         let buttons = $('.btn-option');
 
         buttons.each(function(index, el) {
-          elemento = $(this);
+          let elemento = $(this);
           elemento.removeClass('btn-rate-2 btn-rate-3 btn-rate-4');
           elemento.addClass('btn-rate-1');
         });
-      } else if (emoji_level == 2) {
-        $('.rating-footer-title').text('¿Qué salió mal?');
+      } else if (emoji_level === 2) {
+        rating_footel_title.text('¿Qué salió mal?');
         let buttons = $('.btn-option');
 
         buttons.each(function(index, el) {
-          elemento = $(this);
+          let elemento = $(this);
           elemento.removeClass('btn-rate-1 btn-rate-3 btn-rate-4');
           elemento.addClass('btn-rate-2');
         });
-      } else if (emoji_level == 3) {
-        $('.rating-footer-title').text('¿Qué salió bien?');
+      } else if (emoji_level === 3) {
+        rating_footel_title.text('¿Qué salió bien?');
         let buttons = $('.btn-option');
 
         buttons.each(function(index, el) {
-          elemento = $(this);
+          let elemento = $(this);
           elemento.removeClass('btn-rate-1 btn-rate-2 btn-rate-4');
           elemento.addClass('btn-rate-3');
         });
       } else {
-        $('.rating-footer-title').text('¿Qué salió bien?');
+        rating_footel_title.text('¿Qué salió bien?');
         let buttons = $('.btn-option');
         buttons.each(function(index, el) {
-          elemento = $(this);
+          let elemento = $(this);
           elemento.removeClass('btn-rate-1 btn-rate-2 btn-rate-3');
           elemento.addClass('btn-rate-4')
         });
@@ -168,17 +167,17 @@
       }
 
       if (data['elements_id'].length > 0) {
-        $('#btn-writte-commentary').parent().parent().show('fast');
+        $('#btn-write-commentary').parent().parent().show('fast');
         $('#btn-send-score').attr('disabled', false);
       } else {
-        $('#btn-writte-commentary').parent().parent().hide('fast');
+        $('#btn-write-commentary').parent().parent().hide('fast');
         $('#btn-send-score').attr('disabled', true);
       }
     });
 
-    $(this).on('click', '#btn-writte-commentary', function(event) {
-      let btn_text = $('#btn-writte-commentary').find('.btn-text');
-      let btn_text_icon = $('#btn-writte-commentary .icon-container').find('.material-icons');
+    $(this).on('click', '#btn-write-commentary', function(event) {
+      let btn_text = $('#btn-write-commentary').find('.btn-text');
+      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
       if ($(this).hasClass('btn-text-close')) {
         $(this).removeClass('btn-text-close');
         $('#suggestion-container').show(300);
@@ -206,8 +205,8 @@
     });
 
     $(this).on('change keyup paste mouseup', '#suggestion-textarea', function(event) {
-      let btn_text = $('#btn-writte-commentary').find('.btn-text');
-      let btn_text_icon = $('#btn-writte-commentary .icon-container').find('.material-icons');
+      let btn_text = $('#btn-write-commentary').find('.btn-text');
+      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
 
       if ($(this).val() != data['suggestion']) {
         if (btn_text.text() == 'Escribir un comentario') {
@@ -259,7 +258,7 @@
               window.location = "{% url 'diners:satisfaction_rating' %}";
             }
           );
-          $('#btn-writte-commentary').attr('disabled', true);
+          $('#btn-write-commentary').attr('disabled', true);
           $('#btn-send-score').attr('disabled', true);
         },
         error: function(result, jqXHR, textStatus, errorThrown) {

@@ -8,7 +8,7 @@ app_name = 'diners'
 
 urlpatterns = [
     # Diners pin
-    url(r'^diners/rfid/$', views.RFID, name='rfid'),
+    url(r'^diners/rfid/$', views.rfid, name='rfid'),
     url(r'^diners/satisfaction-rating/$', views.satisfaction_rating, name='satisfaction_rating'),
     url(r'^diners/analytics/$', views.analytics, name='analytics'),
     url(r'^diners/suggestions/$', views.suggestions, name='suggestions'),
