@@ -449,4 +449,4 @@ class RatesHelper(object):
             .prefetch_related('elements').all()
     
     def set_elements_to_evaluate(self):
-        self.__elements_to_evaluate = ElementToEvaluate.objects.all()
+        self.__elements_to_evaluate = ElementToEvaluate.objects.order_by('priority').all()
