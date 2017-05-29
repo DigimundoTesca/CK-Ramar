@@ -131,10 +131,9 @@ def analytics(request):
         elif request.POST['type'] == 'reactions_week':
             initial_date = helper.parse_to_datetime(request.POST['dt_week'].split(',')[0])
             final_date = helper.parse_to_datetime(request.POST['dt_week'].split(',')[1])
-            print(rates_helper.get_suggestions_list(initial_date, final_date), '\n')
             data = {
                 'week_number': helper.get_week_number(initial_date),
-                'week_suggestions': rates_helper.get_suggestions_list(initial_date, final_date),
+                'suggestions': rates_helper.get_rates_list(initial_date, final_date),
             }
             return JsonResponse(data)
 
@@ -144,7 +143,7 @@ def analytics(request):
         'title': PAGE_TITLE + ' | ' + title,
         'page_title': title,
         'dates_range': rates_helper.get_dates_range(),
-        'suggestions_week': rates_helper.get_suggestions_actual_week(),
+        'suggestions_week': rates_helper.get_rates_actual_week(),
         'elements': rates_helper.elements_to_evaluate,
         'total_elements': rates_helper.elements_to_evaluate.count(),
     }

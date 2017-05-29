@@ -376,13 +376,13 @@ class RatesHelper(object):
     def get_satisfaction_ratings(self, initial_date: datetime, final_date: datetime):
         helper = Helper()
         initial_date = helper.naive_to_datetime(initial_date)
-        final_date  = helper.naive_to_datetime(final_date)
+        final_date = helper.naive_to_datetime(final_date)
         if self.__all_satisfaction_ratings is None:
             self.set_all_satisfaction_ratings()
         return self.__all_satisfaction_ratings.filter(
             creation_date__range=[initial_date, final_date]).order_by('-creation_date')
 
-    def get_suggestions_list(self, initial_date: datetime, final_date: datetime):
+    def get_rates_list(self, initial_date: datetime, final_date: datetime):
         """
         Gets the following properties for each week's day: Name, Date and suggestions
         :rtype: list
@@ -391,7 +391,6 @@ class RatesHelper(object):
         week_suggestions_list = []
 
         while initial_date <= final_date:
-            total_suggestions = 0
             day_object = {
                 'date': str(initial_date.strftime('%d-%m-%Y')),
                 'day_name': None,
@@ -404,26 +403,21 @@ class RatesHelper(object):
                     helper.naive_to_datetime(initial_date),
                     helper.naive_to_datetime(initial_date + timedelta(days=1))])
 
-            for filtered_suggestion in filtered_suggestions:
-                if filtered_suggestion.suggestion:
-                    total_suggestions += 1
-
-            day_object['total_suggestions'] = str(total_suggestions)
+            day_object['total_suggestions'] = str(filtered_suggestions.count())
             day_object['day_name'] = helper.get_name_day(initial_date)
             week_suggestions_list.append(day_object)
 
             # restarting counters
             initial_date = initial_date + timedelta(days=1)
 
-        return json.dumps(week_suggestions_list, sort_keys=True, indent=2)
+        return week_suggestions_list
 
-    def get_suggestions_actual_week(self):
+    def get_rates_actual_week(self):
         """
         Gets the following properties for each week's day: Name, Date and suggestions
         """
         helper = Helper()
         week_suggestions_list = []
-        total_suggestions = 0
         days_to_count = helper.get_number_day(datetime.now())
         day_limit = days_to_count
         start_date_number = 0
@@ -439,18 +433,13 @@ class RatesHelper(object):
             filtered_suggestions = self.satisfaction_ratings.filter(
                 creation_date__range=[helper.start_datetime(days_to_count), helper.end_datetime(days_to_count)])
 
-            for filtered_suggestion in filtered_suggestions:
-                if filtered_suggestion.suggestion:
-                    total_suggestions += 1
-
-            day_object['total_suggestions'] = str(total_suggestions)
+            day_object['total_suggestions'] = str(filtered_suggestions.count())
             day_object['day_name'] = helper.get_name_day(helper.start_datetime(days_to_count).date())
 
             week_suggestions_list.append(day_object)
 
             # restarting counters
             days_to_count -= 1
-            total_suggestions = 0
             start_date_number += 1
 
         return json.dumps(week_suggestions_list)

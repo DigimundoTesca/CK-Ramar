@@ -89,6 +89,21 @@
       element_id = "canvas-element-" + element_id;
       ctx_reactions.push(document.getElementById(element_id));
     }
+
+    /*
+    * Returns a list with the rates quantity ot the week per day in the days to set
+    */
+    function get_rates_week_range(rates_list){
+      let week_list = [0, 0, 0, 0, 0, 0, 0];
+      for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < rates_list.length; j++) {
+          if (rates_list[j].number_day == i) {
+            week_list[i] = parseInt(rates_list[j]['total_suggestions']);
+          }
+        }
+      }
+      return week_list;
+    }
     
     function get_suggestions_week_list() {
       let suggestions_list = [];
@@ -168,7 +183,7 @@
       data: {
         labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"],
         datasets: [{
-          label: 'Comentarios del día',
+          label: 'Reacciones del día',
           data: get_suggestions_week_list(),
           backgroundColor: [
             '#2196f3',
@@ -188,7 +203,6 @@
             let selected_day = legendItem[0]._index;
             for (let i = 0; i < suggestions_week.length; i++) {
               if (suggestions_week[i].number_day == selected_day) {
-                console.log(suggestions_week[i])
                 set_reactions_day_chart(suggestions_week[i].date);
               }
             }
@@ -316,10 +330,10 @@
         traditional: true,
         datatype: 'jsonp',
         success: function(result, status, XHR) {
-          console.log(result)
-
           var week_number = result['week_number']
-          console.log(week_number)
+          suggestions_week = result['suggestions'];
+          suggestions_week_chart.data.datasets[0].data = get_rates_week_range(suggestions_week);
+          suggestions_week_chart.update();
 
         },
         error: function(result, jqXHR, textStatus, errorThrown) {
