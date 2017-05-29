@@ -2,8 +2,10 @@ import json
 import pytz
 
 from datetime import datetime, date, timedelta, time
+
+from django.db.models import Min, Max
 from django.utils import timezone
-from diners.models import AccessLog, Diner
+from diners.models import AccessLog, Diner, SatisfactionRating, ElementToEvaluate
 
 
 class Helper(object):
@@ -265,3 +267,197 @@ class DinersHelper(object):
 
     def set_all_diners(self):
         self.__all_diners = Diner.objects.all()
+
+
+class RatesHelper(object):
+    def __init__(self):
+        super(RatesHelper, self).__init__()
+        self.__all_satisfaction_ratings = None
+        self.__elements_to_evaluate = None
+    
+    @property
+    def satisfaction_ratings(self):
+        """
+        :rtype: django.db.models.query.QuerySet
+        """
+        if self.__all_satisfaction_ratings is None:
+            self.set_all_satisfaction_ratings()
+        return self.__all_satisfaction_ratings
+    
+    @property
+    def elements_to_evaluate(self):
+        """
+        :rtype: django.db.models.query.QuerySet
+        """
+        if self.__elements_to_evaluate is None:
+            self.set_elements_to_evaluate()
+        return self.__elements_to_evaluate
+
+    def get_dates_range(self):
+        """
+        Returns a JSON with a years list.
+        The years list contains years objects that contains a weeks list
+            and the Weeks list contains a weeks objects with two attributes: 
+            start date and final date. Ranges of each week.
+        """
+        helper = Helper()
+        try:
+            min_year = self.satisfaction_ratings.aggregate(Min('creation_date'))['creation_date__min'].year
+            max_year = self.satisfaction_ratings.aggregate(Max('creation_date'))['creation_date__max'].year
+            years_list = []  # [2015:object, 2016:object, 2017:object, ...]
+        except:
+            min_year = datetime.now().year
+            max_year = datetime.now().year
+            years_list = []  # [2015:object, 2016:object, 2017:object, ...]
+
+        while max_year >= min_year:
+            year_object = {  # 2015:object or 2016:object or 2017:object ...
+                'year': max_year,
+                'weeks_list': [],
+            }
+
+            ratings_per_year = self.satisfaction_ratings.filter(
+                creation_date__range=[
+                    helper.naive_to_datetime(date(max_year, 1, 1)),
+                    helper.naive_to_datetime(date(max_year, 12, 31))])
+
+            for rating in ratings_per_year:
+                if not year_object['weeks_list']:
+                    """
+                    Creates a new week_object in the weeks_list of the actual year_object
+                    """
+                    week_object = {
+                        'week_number': rating.creation_date.isocalendar()[1],
+                        'start_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                        'end_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                    }
+                    year_object['weeks_list'].append(week_object)
+                    # End if
+                else:
+                    """
+                    Validates if exists some week with an similar week_number of the actual year
+                    If exists a same week in the list validates the start_date and the end_date,
+                    In each case valid if there is an older start date or a more current end date 
+                        if it is the case, update the values.
+                    Else creates a new week_object with the required week number
+                    """
+                    existing_week = False
+                    for week_object in year_object['weeks_list']:
+
+                        if week_object['week_number'] == rating.creation_date.isocalendar()[1]:
+                            # There's a same week number
+                            if datetime.strptime(week_object['start_date'], "%d-%m-%Y").date() > \
+                                    rating.creation_date.date():
+                                week_object['start_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
+                            elif datetime.strptime(week_object['end_date'], "%d-%m-%Y").date() < \
+                                    rating.creation_date.date():
+                                week_object['end_date'] = rating.creation_date.date().strftime("%d-%m-%Y")
+
+                            existing_week = True
+                            break
+
+                    if not existing_week:
+                        # There's a different week number
+                        week_object = {
+                            'week_number': rating.creation_date.isocalendar()[1],
+                            'start_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                            'end_date': rating.creation_date.date().strftime("%d-%m-%Y"),
+                        }
+                        year_object['weeks_list'].append(week_object)
+
+                    # End else
+            # End While
+            year_object['weeks_list'].reverse()
+            years_list.append(year_object)
+            max_year -= 1
+        # End while
+        return json.dumps(years_list)
+
+    def get_satisfaction_ratings(self, initial_date: datetime, final_date: datetime):
+        helper = Helper()
+        initial_date = helper.naive_to_datetime(initial_date)
+        final_date  = helper.naive_to_datetime(final_date)
+        if self.__all_satisfaction_ratings is None:
+            self.set_all_satisfaction_ratings()
+        return self.__all_satisfaction_ratings.filter(
+            creation_date__range=[initial_date, final_date]).order_by('-creation_date')
+
+    def get_suggestions_list(self, initial_date: datetime, final_date: datetime):
+        """
+        Gets the following properties for each week's day: Name, Date and suggestions
+        :rtype: list
+        """
+        helper = Helper()
+        week_suggestions_list = []
+
+        while initial_date <= final_date:
+            total_suggestions = 0
+            day_object = {
+                'date': str(initial_date.strftime('%d-%m-%Y')),
+                'day_name': None,
+                'total_suggestions': None,
+                'number_day': helper.get_number_day(initial_date),
+            }
+
+            filtered_suggestions = self.satisfaction_ratings.filter(
+                creation_date__range=[
+                    helper.naive_to_datetime(initial_date),
+                    helper.naive_to_datetime(initial_date + timedelta(days=1))])
+
+            for filtered_suggestion in filtered_suggestions:
+                if filtered_suggestion.suggestion:
+                    total_suggestions += 1
+
+            day_object['total_suggestions'] = str(total_suggestions)
+            day_object['day_name'] = helper.get_name_day(initial_date)
+            week_suggestions_list.append(day_object)
+
+            # restarting counters
+            initial_date = initial_date + timedelta(days=1)
+
+        return json.dumps(week_suggestions_list, sort_keys=True, indent=2)
+
+    def get_suggestions_actual_week(self):
+        """
+        Gets the following properties for each week's day: Name, Date and suggestions
+        """
+        helper = Helper()
+        week_suggestions_list = []
+        total_suggestions = 0
+        days_to_count = helper.get_number_day(datetime.now())
+        day_limit = days_to_count
+        start_date_number = 0
+
+        while start_date_number <= day_limit:
+            day_object = {
+                'date': str(helper.start_datetime(days_to_count).date().strftime('%d-%m-%Y')),
+                'day_name': None,
+                'total_suggestions': None,
+                'number_day': helper.get_number_day(helper.start_datetime(days_to_count).date()),
+            }
+
+            filtered_suggestions = self.satisfaction_ratings.filter(
+                creation_date__range=[helper.start_datetime(days_to_count), helper.end_datetime(days_to_count)])
+
+            for filtered_suggestion in filtered_suggestions:
+                if filtered_suggestion.suggestion:
+                    total_suggestions += 1
+
+            day_object['total_suggestions'] = str(total_suggestions)
+            day_object['day_name'] = helper.get_name_day(helper.start_datetime(days_to_count).date())
+
+            week_suggestions_list.append(day_object)
+
+            # restarting counters
+            days_to_count -= 1
+            total_suggestions = 0
+            start_date_number += 1
+
+        return json.dumps(week_suggestions_list)
+
+    def set_all_satisfaction_ratings(self):
+        self.__all_satisfaction_ratings = SatisfactionRating.objects\
+            .prefetch_related('elements').all()
+    
+    def set_elements_to_evaluate(self):
+        self.__elements_to_evaluate = ElementToEvaluate.objects.all()
