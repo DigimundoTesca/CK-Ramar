@@ -89,7 +89,7 @@ def satisfaction_rating(request):
 
     template = 'satisfaction_rating.html'
     title = 'Rating'
-    elements = ElementToEvaluate.objects.all()
+    elements = ElementToEvaluate.objects.order_by('element').all()
     context = {
         'title': PAGE_TITLE + ' | ' + title,
         'page_title': title,
