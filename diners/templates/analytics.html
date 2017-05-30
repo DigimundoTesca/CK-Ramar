@@ -69,16 +69,18 @@
 
 <script type="text/javascript" charset="utf-8" defer>
   $(function() {
-    
     let dates_range = JSON.parse('{{ dates_range | safe }}');
     let reactions_week = JSON.parse('{{ reactions_week | safe }}');
+    let suggestions_week = JSON.parse('{{ suggestions_week | safe }}');
     let elements_to_evaluate = []; // Reactions data
     let ctx_week_reactions = document.getElementById("canvas-week-reactions");
+    let ctx_week_suggestions = document.getElementById("canvas-week-suggestions");
     let ctx_reactions = []; // reactions elements charts (DOM)
     let elements_charts = []; // // reaction elements charts (Chart Objects)
     let todayDateObject = new Date();
     let today_date;
     let reactions_week_chart;
+    let suggestions_week_chart;
 
     {% for element in elements %}
       elements_to_evaluate.push({
@@ -95,29 +97,51 @@
 
     /**
      * Returns a list with the rates quantity ot the week per day in the days to set
-     * @param {Object[]} rates_list[]
-     * @param {number} rates_list[].number_day
-     * @return {number[]}
      */
     function get_rates_week_range(rates_list){
       let week_list = [0, 0, 0, 0, 0, 0, 0];
-      console.log(rates_list);
       for (let i = 0; i < 7; i++) {
         for (let j = 0; j < rates_list.length; j++) {
-          if (rates_list[j].number_day === i) {
-            week_list[i] = parseInt(rates_list[j]['total_suggestions']);
+          if (rates_list[j]['number_day'] === i) {
+            week_list[i] = parseInt(rates_list[j]['total_rates']);
+          }
+        }
+      }
+      return week_list;
+    }
+
+    /**
+     * Returns a list with the rates quantity ot the week per day in the days to set
+     */
+    function get_suggestions_week_range(suggestions_list){
+      let week_list = [0, 0, 0, 0, 0, 0, 0];
+      for (let i = 0; i < 7; i++){
+        for (let j = 0; j < suggestions_list.length; j++){
+          if (suggestions_list[j]['number_day'] === i) {
+            week_list[i] = parseInt(suggestions_list[j]['total_suggestions']);
           }
         }
       }
       return week_list;
     }
     
+    function get_rates_week_list() {
+      let rates_list = [];
+      let count = 0;
+
+      while (count < reactions_week.length) {
+        rates_list.push(parseFloat(reactions_week[count]['total_rates']));
+        count++;
+      }
+      return rates_list;
+    }
+
     function get_suggestions_week_list() {
       let suggestions_list = [];
       let count = 0;
 
-      while (count < reactions_week.length) {
-        suggestions_list.push(parseFloat(reactions_week[count].total_suggestions));
+      while (count < suggestions_week.length) {
+        suggestions_list.push(parseFloat(suggestions_week[count]['total_suggestions']));
         count++;
       }
       return suggestions_list;
@@ -176,14 +200,14 @@
           }
         },
 
-        error: function(result, jqXHR, textStatus, errorThrown) {
+        error: function(result) {
           console.log(result);
         },
       });
     }
 
     /**
-     * Draws the chart of reactions of the day
+     * Draws the reactions chart of reactions of the week
      */
     reactions_week_chart = new Chart(ctx_week_reactions, {
       type: 'bar',
@@ -191,15 +215,15 @@
         labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"],
         datasets: [{
           label: 'Reacciones del día',
-          data: get_suggestions_week_list(),
+          data: get_rates_week_list(),
           backgroundColor: [
-            '#2196f3',
+
             '#03a9f4',
-            '#009688',
-            '#ffc107',
-            '#4caf50',
-            '#ff5722',
-            '#f44336',
+            '#03a9f4',
+            '#03a9f4',
+            '#03a9f4',
+            '#03a9f4',
+            '#03a9f4',
           ],
         }],
       },
@@ -209,7 +233,7 @@
           try {
             let selected_day = legendItem[0]._index;
             for (let i = 0; i < reactions_week.length; i++) {
-              if (reactions_week[i].number_day == selected_day) {
+              if (reactions_week[i].number_day === selected_day) {
                 set_reactions_day_chart(reactions_week[i].date);
               }
             }
@@ -226,7 +250,59 @@
         },
         title: {
           display: true,
-          text: 'Niveles de Satisfacción',
+          text: 'Gráfica de evaluaciones de la semana',
+        },
+        legend: {
+          display: true,
+        }
+      }
+    });
+
+    /**
+     * Draws the reactions chart of reactions of the week
+     */
+    suggestions_week_chart = new Chart(ctx_week_suggestions, {
+      type: 'bar',
+      data: {
+        labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+        datasets: [{
+          label: 'Comentarios del día',
+          data: get_suggestions_week_list(),
+          backgroundColor: [
+            '#4caf50',
+            '#4caf50',
+            '#4caf50',
+            '#4caf50',
+            '#4caf50',
+            '#4caf50',
+            '#4caf50',
+          ],
+        }],
+      },
+      options: {
+        responsive: true,
+        onClick: function(event, legendItem) {
+          try {
+            let selected_day = legendItem[0]._index;
+            for (let i = 0; i < reactions_week.length; i++) {
+              if (reactions_week[i].number_day === selected_day) {
+                set_reactions_day_chart(reactions_week[i].date);
+              }
+            }
+          } catch (error) {
+            console.log(error.message);
+          }
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+            },
+          }]
+        },
+        title: {
+          display: true,
+          text: 'Gŕafica de comentarios en la semana',
         },
         legend: {
           display: true,
@@ -286,14 +362,6 @@
     }
 
     /**
-     * Receives a datetime with format from python.
-     * Returns an hour converted into 24-hours format: hh:mm ith Timezone +06:00
-     */
-    function convert_datetime_to_hour(original_datetime){
-      return original_datetime.split('T')[1].split('.')[0].substr(0, 5);
-    }
-
-    /**
      * Returns the text to show in the weeks select
      */
     function convert_date_to_str(date) {
@@ -308,7 +376,7 @@
     /** 
      * Refresh the page with de dates of the year and week selected
      */
-    $(this).on('click', '#dt-week', function(event) {
+    $(this).on('click', '#dt-week', function() {
       let dt_year = $('#dt-year').val();
       let dt_week = $('#dt-week').val();
       
@@ -330,17 +398,20 @@
         },
         traditional: true,
         datatype: 'jsonp',
-        success: function(result, status, XHR) {
+        success: function(result) {
           let week_number = result['week_number'];
           reactions_week = result['reactions'];
+          suggestions_week = result['suggestions'];
           reactions_week_chart.data.datasets[0].data = get_rates_week_range(reactions_week);
           reactions_week_chart.update();
+          suggestions_week_chart.data.datasets[0].data = get_rates_week_range(reactions_week);
+          suggestions_week_chart.update();
 
         },
-        error: function(result, jqXHR, textStatus, errorThrown) {
+        error: function(result) {
           console.log(result);
         },
-        complete: function(result){
+        complete: function(){
           setTimeout(function(){
             swal.close();
           }, 300)
@@ -360,10 +431,9 @@
           );
       });
 
-      selected_year = $('#dates-range-form').find('#dt-year').val();
-      
+      selected_year = parseInt($('#dates-range-form').find('#dt-year').val());
       $.each(dates_range, function(index, item) {
-        if (dates_range[index].year ==  selected_year) {
+        if (dates_range[index].year ===  selected_year) {
           $.each(dates_range[index].weeks_list, function(index, item) {
             $('#dates-range-form').find('#dt-week').append(
               `<option value=${item.start_date},${item.end_date}> Semana ${item.week_number}: ${convert_date_to_str(item.start_date)} - ${convert_date_to_str(item.end_date)}\n</option>`
