@@ -17,6 +17,9 @@
       <div class="col-xs-12">
         <div class="col-xs-12 col-lg-6 col-xl-5 mb-3 week-suggestions-chart">
           <div class="canvas-holder">
+            <canvas id="canvas-week-reactions"></canvas>
+          </div>
+          <div class="canvas-holder">
             <canvas id="canvas-week-suggestions"></canvas>
           </div>
         </div>
@@ -68,14 +71,14 @@
   $(function() {
     
     let dates_range = JSON.parse('{{ dates_range | safe }}');
-    let suggestions_week = JSON.parse('{{ suggestions_week | safe }}');
+    let reactions_week = JSON.parse('{{ reactions_week | safe }}');
     let elements_to_evaluate = []; // Reactions data
-    let ctx_week_suggestions = document.getElementById("canvas-week-suggestions");
-    let ctx_reactions = []; // sugestions elements charts (DOM)
-    let elements_charts = []; // // sugestions elements charts (Chart Objects)
+    let ctx_week_reactions = document.getElementById("canvas-week-reactions");
+    let ctx_reactions = []; // reactions elements charts (DOM)
+    let elements_charts = []; // // reaction elements charts (Chart Objects)
     let todayDateObject = new Date();
     let today_date;
-    let suggestions_week_chart;
+    let reactions_week_chart;
 
     {% for element in elements %}
       elements_to_evaluate.push({
@@ -90,14 +93,18 @@
       ctx_reactions.push(document.getElementById(element_id));
     }
 
-    /*
-    * Returns a list with the rates quantity ot the week per day in the days to set
-    */
+    /**
+     * Returns a list with the rates quantity ot the week per day in the days to set
+     * @param {Object[]} rates_list[]
+     * @param {number} rates_list[].number_day
+     * @return {number[]}
+     */
     function get_rates_week_range(rates_list){
       let week_list = [0, 0, 0, 0, 0, 0, 0];
+      console.log(rates_list);
       for (let i = 0; i < 7; i++) {
         for (let j = 0; j < rates_list.length; j++) {
-          if (rates_list[j].number_day == i) {
+          if (rates_list[j].number_day === i) {
             week_list[i] = parseInt(rates_list[j]['total_suggestions']);
           }
         }
@@ -109,8 +116,8 @@
       let suggestions_list = [];
       let count = 0;
 
-      while (count < suggestions_week.length) {
-        suggestions_list.push(parseFloat(suggestions_week[count].total_suggestions));
+      while (count < reactions_week.length) {
+        suggestions_list.push(parseFloat(reactions_week[count].total_suggestions));
         count++;
       }
       return suggestions_list;
@@ -178,7 +185,7 @@
     /**
      * Draws the chart of reactions of the day
      */
-    suggestions_week_chart = new Chart(ctx_week_suggestions, {
+    reactions_week_chart = new Chart(ctx_week_reactions, {
       type: 'bar',
       data: {
         labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"],
@@ -201,9 +208,9 @@
         onClick: function(event, legendItem) {
           try {
             let selected_day = legendItem[0]._index;
-            for (let i = 0; i < suggestions_week.length; i++) {
-              if (suggestions_week[i].number_day == selected_day) {
-                set_reactions_day_chart(suggestions_week[i].date);
+            for (let i = 0; i < reactions_week.length; i++) {
+              if (reactions_week[i].number_day == selected_day) {
+                set_reactions_day_chart(reactions_week[i].date);
               }
             }
           } catch (error) {
@@ -263,12 +270,6 @@
         },
         options: {
           cutoutPercentage: 50,
-          // rotation: 50,
-          // circumference: 5,
-          // animation.animateScale: true,
-          // animation: {
-          //   animateScale: true,
-          // },
           responsive: true,
           animation: {
             animateScale: true
@@ -308,8 +309,8 @@
      * Refresh the page with de dates of the year and week selected
      */
     $(this).on('click', '#dt-week', function(event) {
-      dt_year = $('#dt-year').val();
-      dt_week = $('#dt-week').val();
+      let dt_year = $('#dt-year').val();
+      let dt_week = $('#dt-week').val();
       
       $.ajax({
         url: "{% url 'diners:analytics' %}",
@@ -330,10 +331,10 @@
         traditional: true,
         datatype: 'jsonp',
         success: function(result, status, XHR) {
-          var week_number = result['week_number']
-          suggestions_week = result['suggestions'];
-          suggestions_week_chart.data.datasets[0].data = get_rates_week_range(suggestions_week);
-          suggestions_week_chart.update();
+          let week_number = result['week_number'];
+          reactions_week = result['reactions'];
+          reactions_week_chart.data.datasets[0].data = get_rates_week_range(reactions_week);
+          reactions_week_chart.update();
 
         },
         error: function(result, jqXHR, textStatus, errorThrown) {
@@ -352,7 +353,6 @@
      * Fills the weeks select
      */
     function fill_dates_range_form() {
-      let dates_range_form = $(this).find('#dt-year');
       let selected_year;
       $.each(dates_range, function(index, item) {
          $('#dates-range-form').find('#dt-year').append(
