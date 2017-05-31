@@ -384,7 +384,7 @@ class RatesHelper(object):
 
     def get_info_rates_list(self, initial_date: datetime, final_date: datetime):
         """
-        Gets the following properties for each week's day: Name, Date and suggestions
+        Returns a list with all the rates data for te selected range
         :rtype: list
         """
         helper = Helper()
