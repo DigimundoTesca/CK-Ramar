@@ -81,6 +81,19 @@
     // lastElementTop = $('#listofstuff .anitem:last-child').position().top ;
     // scrollAmount = lastElementTop - 200 ;
     
+    function show_writte_suggestion() {
+        $('#btn-send-container').hide(0);
+        $('#suggestion-container').show(300);
+        $('#elements-container').hide(300);
+        $('.emojis-container').hide(300);
+        $('#header-question').hide(300);
+        $('#btn-write-commentary').removeClass('btn-text-close')
+        $('#btn-write-commentary').parent().parent().show('fast');
+        let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
+
+        btn_text_icon.text('keyboard_arrow_up');
+    }
+
     /**
      * Sets the buttons classes
      */
@@ -111,6 +124,9 @@
           elemento.removeClass('btn-rate-2 btn-rate-3 btn-rate-4');
           elemento.addClass('btn-rate-1');
         });
+
+        show_writte_suggestion();
+
       } else if (emoji_level === 2) {
         rating_footel_title.text('¿Qué salió mal?');
         let buttons = $('.btn-option');
@@ -120,6 +136,7 @@
           elemento.removeClass('btn-rate-1 btn-rate-3 btn-rate-4');
           elemento.addClass('btn-rate-2');
         });
+        show_writte_suggestion();
       } else if (emoji_level === 3) {
         rating_footel_title.text('¿Qué salió bien?');
         let buttons = $('.btn-option');
@@ -185,7 +202,7 @@
         $('#elements-container').hide(0);
         $('.emojis-container').hide(300);
         $('#header-question').hide(300);
-        btn_text_icon.text('keyboard_arrow_up')
+        btn_text_icon.text('keyboard_arrow_up');
       } else {
         $(this).addClass('btn-text-close');
         if (data['suggestion'].length > 0) {
