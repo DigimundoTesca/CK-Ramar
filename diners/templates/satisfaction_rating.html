@@ -49,7 +49,7 @@
           </button>
         </div>
       </div>
-      <small class="form-text text-muted mt-1">Tu comentario es totalmente anónimo</small>
+      <small id="anon-msg" class="form-text text-muted mt-1 hidden">Tu comentario es totalmente anónimo</small>
       <div class="form-group hidden" id="suggestion-container">
         <textarea class="form-control" id="suggestion-textarea" rows="4" placeholder="Escríbe aquí cómo podemos mejorar."></textarea>
       </div>
@@ -83,16 +83,35 @@
     // scrollAmount = lastElementTop - 200 ;
     
     function show_writte_suggestion() {
-        $('#btn-send-container').hide(0);
-        $('#suggestion-container').show(300);
-        $('#elements-container').hide(300);
-        $('.emojis-container').hide(300);
-        $('#header-question').hide(300);
-        $('#btn-write-commentary').removeClass('btn-text-close')
-        $('#btn-write-commentary').parent().parent().show('fast');
-        let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
+      let btn_text = $('#btn-write-commentary').find('.btn-text');
+      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
+      $('#btn-write-commentary').addClass('btn-text-close');
+      if (data['suggestion'].length > 0) {
+        btn_text.fadeOut(100, function() {
+          $(this).text('Mensaje Guardado').fadeIn(100);
+          btn_text_icon.text('keyboard_arrow_down')
+        });
+      }
+      $('#suggestion-container').hide(300);
+      $('#btn-send-container').show(300);
+      $('#elements-container').show(300);
+      $('.emojis-container').show(300);
+      $('#header-question').show(300);
+      $('#anon-msg').addClass('hidden');
+    }
 
-        btn_text_icon.text('keyboard_arrow_up');
+    function hidde_writte_suggestion() {
+      let btn_text = $('#btn-write-commentary').find('.btn-text');
+      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
+      
+      $('#btn-write-commentary').removeClass('btn-text-close');
+      $('#suggestion-container').show(300);
+      $('#btn-send-container').hide(0);
+      $('#elements-container').hide(0);
+      $('.emojis-container').hide(300);
+      $('#header-question').hide(300);
+      $('#anon-msg').removeClass('hidden');
+      btn_text_icon.text('keyboard_arrow_up');
     }
 
     /**
@@ -194,31 +213,10 @@
     });
 
     $(this).on('click', '#btn-write-commentary', function(event) {
-      let btn_text = $('#btn-write-commentary').find('.btn-text');
-      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
       if ($(this).hasClass('btn-text-close')) {
-        $(this).removeClass('btn-text-close');
-        $('#suggestion-container').show(300);
-        $('#btn-send-container').hide(0);
-        $('#elements-container').hide(0);
-        $('.emojis-container').hide(300);
-        $('#header-question').hide(300);
-        btn_text_icon.text('keyboard_arrow_up');
+        hidde_writte_suggestion();
       } else {
-        $(this).addClass('btn-text-close');
-        if (data['suggestion'].length > 0) {
-          btn_text.fadeOut(100, function() {
-            $(this).text('Mensaje Guardado').fadeIn(100);
-            btn_text_icon.text('keyboard_arrow_down')
-          });
-        }
-        $('#suggestion-container').hide(300);
-        // $('#btn-send-container').removeClass('hidden')
-        // $('#elements-container').removeClass('hidden')
-        $('#btn-send-container').show(300);
-        $('#elements-container').show(300);
-        $('.emojis-container').show(300);
-        $('#header-question').show(300);
+        show_writte_suggestion();
       }
     });
 
