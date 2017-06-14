@@ -428,6 +428,12 @@ small {
   min-height: 80vh;
   overflow: hidden;
 }
+.container-rating #suggestion-textarea {
+  border-color: #90CAF9;
+}
+.container-rating #suggestion-textarea:focus{
+  box-shadow: 0 0 3px;
+}
 .container-rating .rating-title {
   width: 100%;
   display: block;
