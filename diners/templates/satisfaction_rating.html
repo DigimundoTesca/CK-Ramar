@@ -79,6 +79,8 @@
 
 {% block javascript %}
 <script src="{% static 'js/Chart.bundle.min.js' %}" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-touch-events/1.0.9/jquery.mobile-events.min.js"></script>
+<script src="{% static 'js/jquery-migrate-3.0.0.js' %}"></script>
 <script type="text/javascript" charset="utf-8" async>
   $(function() {
     let data = {
@@ -88,6 +90,9 @@
     };
 
     let edit_mode = false;
+    let userActive = false;
+    let secondsElapsed;
+    let chronometer;
 
     function showElements(emoji_level) {
       let rating_footel_title = $('.rating-footer-title');
@@ -208,6 +213,58 @@
       });
     }
 
+    function Timer(fn, t){
+      let timerObject = setInterval(fn, t);
+      this.elapsedTime = 1;
+
+      this.stop = function () {
+        if (timerObject) {
+          clearInterval(timerObject);
+          timerObject = null;
+        }
+        return this;
+      }
+
+      this.start = function () {
+        if (!timerObject) {
+          this.stop();
+          timerObject = setInterval(fn, t);
+        }
+        return this;
+      }
+
+      this.reset = function(newT) {
+        t = newT;
+        return this.stop().start();
+      }
+    }
+
+    function setChronometer() {
+      if (userActive) {
+        chronometer.elapsedTime = 1;
+      } else {
+        chronometer = new Timer(function(){
+          if (chronometer.elapsedTime === 60) {
+            swal({
+            title: '¿Sigues ahí?',
+            text: 'Presiona ok para evitar el reinicio.',
+            type: "question",
+            timer: 3000,
+          }).then(
+            function() {
+              console.log('sigue')
+            },
+            function(dismiss) {
+              window.location = "{% url 'diners:satisfaction_rating' %}";
+            }
+          );
+          }
+          chronometer.elapsedTime += 1;
+        }, 1000);
+        userActive = true;
+      }
+    }
+
     /**
      * Sets the buttons classes
      */
@@ -283,7 +340,7 @@
     });
 
     $(this).on('change keyup paste mouseup', '#suggestion-textarea', function(event) {
-
+      setChronometer();
       if ($(this).val() != data['suggestion']) {
         data['suggestion'] = $(this).val();
       }
@@ -310,7 +367,11 @@
         $('#btn-write-commentary').find('span.icon-container .material-icons').text('create');
         edit_mode = false;
     });
-  });
 
+    $(this).on('click', function(event) {
+      setChronometer();
+    });
+
+  });
 </script>
 {% endblock javascript %}
