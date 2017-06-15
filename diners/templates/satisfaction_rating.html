@@ -79,52 +79,66 @@
       'suggestion': '',
     };
 
-    // lastElementTop = $('#listofstuff .anitem:last-child').position().top ;
-    // scrollAmount = lastElementTop - 200 ;
-    
-    function show_writte_suggestion() {
-      let btn_text = $('#btn-write-commentary').find('.btn-text');
-      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
-      $('#btn-write-commentary').addClass('btn-text-close');
-      if (data['suggestion'].length > 0) {
-        btn_text.fadeOut(100, function() {
-          $(this).text('Mensaje Guardado').fadeIn(100);
-          btn_text_icon.text('keyboard_arrow_down')
+    function showElements(emoji_level) {
+      let rating_footel_title = $('.rating-footer-title');
+      let buttons = $('.btn-option');
+
+      if (emoji_level === 1) {
+        rating_footel_title.text('¿Qué salió mal?');
+        buttons.each(function(index, el) {
+          let button = $(this);
+          button.removeClass('btn-rate-2 btn-rate-3 btn-rate-4');
+          button.addClass('btn-rate-1');
+        });
+      } else if (emoji_level === 2){
+        let buttons = $('.btn-option');
+        rating_footel_title.text('¿Qué salió mal?');
+        buttons.each(function(index, el) {
+          let button = $(this);
+          button.removeClass('btn-rate-1 btn-rate-3 btn-rate-4');
+          button.addClass('btn-rate-2');
+        });
+      } else if (emoji_level === 3) {
+        let buttons = $('.btn-option');
+        rating_footel_title.text('¿Qué salió bien?');
+        buttons.each(function(index, el) {
+          let button = $(this);
+          button.removeClass('btn-rate-1 btn-rate-2 btn-rate-4');
+          button.addClass('btn-rate-3');
+        });
+      } else if (emoji_level === 4) {
+        let buttons = $('.btn-option');
+        rating_footel_title.text('¿Qué salió bien?');
+        buttons.each(function(index, el) {
+          let button = $(this);
+          button.removeClass('btn-rate-1 btn-rate-2 btn-rate-3');
+          button.addClass('btn-rate-4')
         });
       }
-      $('#suggestion-container').hide(300);
-      $('#btn-send-container').show(300);
+
+      if (emoji_level >= 1 && emoji_level <= 2) {
+        $('#btn-send-container').hide(300);
+      } else {
+        $('#btn-send-container').show(300);
+      }
+
       $('#elements-container').show(300);
-      $('.emojis-container').show(300);
-      $('#header-question').show(300);
-      $('#anon-msg').addClass('hidden');
+      $('.rating-footer').show(300);
+
     }
 
-    function hidde_writte_suggestion() {
-      let btn_text = $('#btn-write-commentary').find('.btn-text');
-      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
-      
-      $('#btn-write-commentary').removeClass('btn-text-close');
-      $('#suggestion-container').show(300);
-      $('#btn-send-container').hide(0);
-      $('#elements-container').hide(0);
-      $('.emojis-container').hide(300);
-      $('#header-question').hide(300);
-      $('#anon-msg').removeClass('hidden');
-      btn_text_icon.text('keyboard_arrow_up');
+    function hiddeElement() {
+
     }
 
     /**
      * Sets the buttons classes
      */
     $(this).on('click', '.emoji-container', function(event) {
-      let emoji = $(this);
+      let selected_emoji = $(this);
       let emojis = $('.emoji');
-      emojis.removeClass('selected');
-      emojis.addClass('ghost');
-      let emoji_level = emoji.attr('class').split(' ');
-      emoji.find('.emoji').addClass('selected');
-      let rating_footel_title = $('.rating-footer-title');
+      let emoji_level = $(this).attr('class').split(' ');
+      
       /**
        * Gets the emoji level
        */
@@ -135,52 +149,15 @@
         }
       }
 
-      if (emoji_level === 1) {
-        rating_footel_title.text('¿Qué salió mal?');
-        let buttons = $('.btn-option');
+      /**
+       * Set ghost emojis
+       */
+      emojis.removeClass('selected');
+      emojis.addClass('ghost');
+      selected_emoji.find('.emoji').addClass('selected');
 
-        buttons.each(function(index, el) {
-          let elemento = $(this);
-          elemento.removeClass('btn-rate-2 btn-rate-3 btn-rate-4');
-          elemento.addClass('btn-rate-1');
-        });
+      showElements(emoji_level);
 
-        show_writte_suggestion();
-
-      } else if (emoji_level === 2) {
-        rating_footel_title.text('¿Qué salió mal?');
-        let buttons = $('.btn-option');
-
-        buttons.each(function(index, el) {
-          let elemento = $(this);
-          elemento.removeClass('btn-rate-1 btn-rate-3 btn-rate-4');
-          elemento.addClass('btn-rate-2');
-        });
-        show_writte_suggestion();
-      } else if (emoji_level === 3) {
-        rating_footel_title.text('¿Qué salió bien?');
-        let buttons = $('.btn-option');
-
-        buttons.each(function(index, el) {
-          let elemento = $(this);
-          elemento.removeClass('btn-rate-1 btn-rate-2 btn-rate-4');
-          elemento.addClass('btn-rate-3');
-        });
-      } else {
-        rating_footel_title.text('¿Qué salió bien?');
-        let buttons = $('.btn-option');
-        buttons.each(function(index, el) {
-          let elemento = $(this);
-          elemento.removeClass('btn-rate-1 btn-rate-2 btn-rate-3');
-          elemento.addClass('btn-rate-4')
-        });
-      }
-      $('.rating-footer').show(300);
-      
-      setTimeout(function(){ 
-        location.href = '#question';
-      }, 300);
-      
     });
 
     /**
@@ -190,7 +167,6 @@
       let element = $(this);
       let element_parent = $(this).parent();
       let element_parent_id = element_parent[0].id.split('-')[2];
-
       if (element[0].checked == false) {
         element_parent.removeClass('selected');
         for (var i = 0; i < data['elements_id'].length; i++) {
@@ -202,7 +178,6 @@
         element_parent.addClass('selected');
         data['elements_id'].push(element_parent_id)
       }
-
       if (data['elements_id'].length > 0) {
         $('#btn-write-commentary').parent().parent().show('fast');
         $('#btn-send-score').attr('disabled', false);
@@ -213,11 +188,7 @@
     });
 
     $(this).on('click', '#btn-write-commentary', function(event) {
-      if ($(this).hasClass('btn-text-close')) {
-        hidde_writte_suggestion();
-      } else {
-        show_writte_suggestion();
-      }
+
     });
 
     $(this).on('change keyup paste mouseup', '#suggestion-textarea', function(event) {

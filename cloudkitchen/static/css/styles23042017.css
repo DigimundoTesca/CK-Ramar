@@ -474,12 +474,10 @@ small {
   height: 100%;
   width: 100%;
 }
-.container-rating .rating-footer {
-  display: none;
-}
 .container-rating .rating-footer #elements-container {
   display: flex;
   justify-content: center;
+  display: none;
 }
 .container-rating .rating-footer #elements-container .element-container {
   align-self: center;
@@ -491,6 +489,9 @@ small {
 }
 .container-rating .rating-footer .hidden {
   display: none;  
+}
+.container-rating .rating-footer #btn-send-container {
+  display: none;
 }
 .container-rating .rating-footer #btn-writte-commentary,
 .container-rating .rating-footer #btn-send-score {
