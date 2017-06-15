@@ -27,7 +27,7 @@
     </div>
   </div>
   <div class="rating-footer mt-2 mb-3">
-    <h3 id="question" class="text-xs-center rating-footer-title"></h3>
+    <h3 id="question" class="text-xs-center rating-footer-title mt-2"></h3>
     <div class="container">
       <div class="row" id="elements-container">
         {% for element in elements %}
@@ -40,17 +40,25 @@
         {% endfor %}
       </div>
       <div class="row mt-1 hidden">
-        <div class="col-xs-12">
-          <button id="btn-write-commentary" class="btn btn-block btn-outline-primary btn-text-close">
-            <span class="btn-text">Escribir un comentario</span>
+        <div class="col-xs-12 btn-suggestion-container">
+          <button id="btn-write-commentary" class="btn btn-block btn-primary btn-text-close">
+            <span class="btn-text">Escribir comentario y enviar</span>
             <span class="icon-container">
-              <i class="material-icons">keyboard_arrow_down</i>
+              <i class="material-icons">create</i>
+            </span>
+          </button>
+        </div>
+        <div class="col-xs-2 hidden btn-arrow-container">
+          <button id="btn-arrow" class="btn btn-outline-info btn-block">
+            <span class="btn-text"></span>
+            <span class="icon-container">
+              <i class="material-icons">arrow_back</i>
             </span>
           </button>
         </div>
       </div>
-      <small id="anon-msg" class="form-text text-muted mt-1 hidden">Tu comentario es totalmente anónimo</small>
       <div class="form-group hidden" id="suggestion-container">
+        <small id="anon-msg" class="form-text text-muted mt-1 hidden">Tu comentario es totalmente anónimo</small>
         <textarea class="form-control" id="suggestion-textarea" rows="4" placeholder="Escríbe aquí cómo podemos mejorar."></textarea>
       </div>
       <div class="row mt-1" id="btn-send-container">
@@ -78,6 +86,8 @@
       'elements_id': [],
       'suggestion': '',
     };
+
+    let edit_mode = false;
 
     function showElements(emoji_level) {
       let rating_footel_title = $('.rating-footer-title');
@@ -124,11 +134,78 @@
 
       $('#elements-container').show(300);
       $('.rating-footer').show(300);
-
+      $('.emojis-container').show(300);
+      $('#header-question').show(300);
     }
 
-    function hiddeElement() {
+    function hideElements() {
+      $('#elements-container').hide(300);
+      $('#btn-send-container').hide(300);
+      $('.emojis-container').hide(300);
+      $('#header-question').hide(300);
 
+      $('#btn-write-commentary').find('span.btn-text').text('Guardar y Enviar');
+      $('#btn-write-commentary').find('span.icon-container .material-icons').text('send');
+    }
+
+    function showSuggestionsContainer() {
+      $('#suggestion-container').show(300)
+      $('#anon-msg').removeClass('hidden')
+    }
+    
+    function hideSuggestionsContainer() {
+      $('#suggestion-container').hide(300)
+      $('#anon-msg').addClass('hidden')
+    }
+
+    function sendTest() {
+      console.log('enviarmos!')
+      $.ajax({
+        url: "{% url 'diners:satisfaction_rating' %}",
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          'satisfaction_rating': data['satisfaction_rating'],
+          'elements_id': JSON.stringify(data['elements_id']),
+          'suggestion': data['suggestion'],
+          'type': 'satisfaction_rating',
+        },
+        traditional: true,
+        datatype: 'jsonp',
+        beforeSend: function() {
+          swal({
+            title: "Enviando comentario",
+          });
+          swal.enableLoading();
+        },
+        success: function(result) {
+          swal({
+            title: 'Los grandes cambios comienzan con una opinión',
+            text: '¡Gracias!',
+            type: "success",
+            timer: 2000,
+            showConfirmButton: false
+          }).then(
+            function() {},
+            function(dismiss) {
+              window.location = "{% url 'diners:satisfaction_rating' %}";
+            }
+          );
+          $('#btn-write-commentary').attr('disabled', true);
+          $('#btn-send-score').attr('disabled', true);
+        },
+        error: function(result, jqXHR, textStatus, errorThrown) {
+          swal({
+            title: 'Ha surgido un problema en el servidor',
+            text: 'Intente más tarde.',
+            type: "error",
+            showConfirmButton: false
+          }).then(
+            function() {},
+            function(dismiss) {}
+          );
+        },
+      });
     }
 
     /**
@@ -188,78 +265,50 @@
     });
 
     $(this).on('click', '#btn-write-commentary', function(event) {
+      if (edit_mode) {
+        edit_mode = false;
+        sendTest();
+      } else {
+        $('.btn-suggestion-container').removeClass('col-xs-12');
+        $('.btn-suggestion-container').addClass('col-xs-10')
+        $('.btn-arrow-container').removeClass('hidden');
+        edit_mode = true;
+        hideElements();
+        showSuggestionsContainer();
 
+        if(data['suggestion'] === '') {
+          $('#btn-write-commentary').attr('disabled',true);
+        }
+      }
     });
 
     $(this).on('change keyup paste mouseup', '#suggestion-textarea', function(event) {
-      let btn_text = $('#btn-write-commentary').find('.btn-text');
-      let btn_text_icon = $('#btn-write-commentary .icon-container').find('.material-icons');
 
       if ($(this).val() != data['suggestion']) {
-        if (btn_text.text() == 'Escribir un comentario') {
-          btn_text.fadeOut(100, function() {
-            $(this).text('Guardar').fadeIn(100);
-          });
-          btn_text_icon.text('keyboard_arrow_up')
-        }
         data['suggestion'] = $(this).val();
       }
 
-      if (data['suggestion'].length == 0) {
-        btn_text.fadeOut(100, function() {
-          $(this).text('Escribir un comentario').fadeIn(100);
-        });
-        btn_text_icon.text('keyboard_arrow_down')
+      if (data['suggestion'].length != 0) {
+        $('#btn-write-commentary').attr('disabled', false);
+      } else {
+        $('#btn-write-commentary').attr('disabled', true);
       }
     });
 
     $(this).on('click', '#btn-send-score', function(event) {
-      $.ajax({
-        url: "{% url 'diners:satisfaction_rating' %}",
-        type: 'POST',
-        data: {
-          csrfmiddlewaretoken: '{{ csrf_token }}',
-          'satisfaction_rating': data['satisfaction_rating'],
-          'elements_id': JSON.stringify(data['elements_id']),
-          'suggestion': data['suggestion'],
-          'type': 'satisfaction_rating',
-        },
-        traditional: true,
-        datatype: 'jsonp',
-        beforeSend: function() {
-          swal({
-            title: "Enviando comentario",
-          });
-          swal.enableLoading();
-        },
-        success: function(result) {
-          swal({
-            title: 'Los grandes cambios comienzan con una opinión',
-            text: '¡Gracias!',
-            type: "success",
-            timer: 2000,
-            showConfirmButton: false
-          }).then(
-            function() {},
-            function(dismiss) {
-              window.location = "{% url 'diners:satisfaction_rating' %}";
-            }
-          );
-          $('#btn-write-commentary').attr('disabled', true);
-          $('#btn-send-score').attr('disabled', true);
-        },
-        error: function(result, jqXHR, textStatus, errorThrown) {
-          swal({
-            title: 'Ha surgido un problema en el servidor',
-            text: 'Intente más tarde.',
-            type: "error",
-            showConfirmButton: false
-          }).then(
-            function() {},
-            function(dismiss) {}
-          );
-        },
-      });
+      sendTest();
+    });
+
+    $(this).on('click', '#btn-arrow', function(event) {
+        $('#btn-write-commentary').attr('disabled', false);
+        $('.btn-arrow-container').addClass('hidden');
+        $('.btn-suggestion-container').removeClass('col-xs-10');
+        $('.btn-suggestion-container').addClass('col-xs-12');
+        showElements(data['satisfaction_rating']);
+        hideSuggestionsContainer();
+        $('#btn-write-commentary').find('span.btn-text').text('Escribir comentario y enviar');
+        $('#btn-write-commentary').find('span.icon-container .material-icons').text('create');
+        edit_mode = false;
     });
   });
 
