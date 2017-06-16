@@ -49,6 +49,9 @@
                 <canvas id="canvas-element-{{element.id}}"></canvas>
               </div>
             {% endfor %}
+              <div class="canvas-holder doughnut-chart col-xs-12 col-sm-6 col-md-4 col-xl-3 mb-3">
+                <canvas id="canvas-element-total"></canvas>
+              </div>
           </div>
         </div>
       </div>
@@ -89,10 +92,14 @@
       });
     {% endfor %}
 
-    for (let i = 0; i < {{ total_elements }}; i++) {
-      let element_id = elements_to_evaluate[i].id;
-      element_id = "canvas-element-" + element_id;
-      ctx_reactions.push(document.getElementById(element_id));
+    for (let i = 0; i <= {{ total_elements }}; i++) {
+      if (i === {{ total_elements }}) {
+        ctx_reactions.push(document.getElementById('canvas-element-total'));
+      } else {
+        let element_id = elements_to_evaluate[i].id;
+        element_id = "canvas-element-" + element_id;
+        ctx_reactions.push(document.getElementById(element_id));
+      }
     }
 
     /**
@@ -164,15 +171,23 @@
         datatype: 'jsonp',
         beforeSend: function(){},
         success: function(result) {
-          $('#bounce-cont').hide('900');
+          $('#bounce-cont').hide(1000);
 
-          for(let i = 0; i < {{ total_elements }}; i++) {
+          for(let i = 0; i <= {{ total_elements }}; i++) {
             let is_empty = true;
-            /**
-             * Sets the doughnuts with the new values
-             */
-            for (let j = 0; j < 4; j++) {
-              elements_charts[i].data.datasets[0].data[j] = result[i].reactions[j].quantity;
+
+            if ( i === {{ total_elements }}) {
+              for (let j = 0; j < 4; j++) {
+                elements_charts[i].data.datasets[0].data[j] = result['total_reactions'].reactions[j].quantity;
+              }
+
+            } else {
+              /**
+               * Sets the doughnuts with the new values
+               */
+              for (let j = 0; j < 4; j++) {
+                elements_charts[i].data.datasets[0].data[j] = result['reactions_list'][i].reactions[j].quantity;
+              }
             }
 
             /**
@@ -183,6 +198,7 @@
                 is_empty = false;
               }
             }
+
             if (is_empty) {
               elements_charts[i].config.options.tooltips.callbacks.label = function () {
                 return ' Sin reacciones';
@@ -196,6 +212,7 @@
               };
               elements_charts[i].config.data.datasets[0].data.splice(4, 1);
             }
+
             elements_charts[i].update();
           }
         },
@@ -313,52 +330,96 @@
     /**
      * Draws the Doughnuts Charts
      */
-    for (let i = 0; i < {{ total_elements }}; i++) {
-      let data = [];
-      for(let j = 0; j < 4; j++) {
-        data[j] = parseInt(Math.random() * 100  );
+    for (let i = 0; i <= {{ total_elements }}; i++) {
+      if ( i === {{ total_elements }}) {
+        elements_charts[i] = new Chart(ctx_reactions[i], {
+          type: 'doughnut',
+          data: {
+            labels: [
+            "Enojado",
+            "Triste",
+            "Alegre",
+            "Encantado",
+            "Sin Reacciones",
+            ],
+            datasets: [{
+              data: [0,0,0,0,0],
+              backgroundColor: [
+              "#FF5252",
+              "#FFC400",
+              "#2979FF",
+              "#00E676",
+              ],
+              hoverBackgroundColor: [
+              "#FF5252",
+              "#FFC400",
+              "#2979FF",
+              "#00E676"
+              ],
+            }],
+          },
+          options: {
+            cutoutPercentage: 50,
+            responsive: true,
+            animation: {
+              animateScale: true
+            },
+            title: {
+              display: true,
+              text: 'Total de Reacciones',
+            },
+            legend: {
+              display: false,
+            },
+          },
+        });
+      } else {
+        let data = [];
+        for(let j = 0; j < 4; j++) {
+          data[j] = parseInt(Math.random() * 100  );
+        }
+        elements_charts[i] = new Chart(ctx_reactions[i], {
+          type: 'doughnut',
+          data: {
+            labels: [
+            "Enojado",
+            "Triste",
+            "Alegre",
+            "Encantado",
+            "Sin Reacciones",
+            ],
+            datasets: [{
+              data: [0,0,0,0,0],
+              backgroundColor: [
+              "#FF5252",
+              "#FFC400",
+              "#2979FF",
+              "#00E676",
+              ],
+              hoverBackgroundColor: [
+              "#FF5252",
+              "#FFC400",
+              "#2979FF",
+              "#00E676"
+              ],
+            }],
+          },
+          options: {
+            cutoutPercentage: 50,
+            responsive: true,
+            animation: {
+              animateScale: true
+            },
+            title: {
+              display: true,
+              text: elements_to_evaluate[i].name,
+            },
+            legend: {
+              display: false,
+            },
+          },
+        });
       }
-      elements_charts[i] = new Chart(ctx_reactions[i], {
-        type: 'doughnut',
-        data: {
-          labels: [
-          "Enojado",
-          "Triste",
-          "Alegre",
-          "Encantado",
-          "Sin Reacciones",
-          ],
-          datasets: [{
-            data: [0,0,0,0,0],
-            backgroundColor: [
-            "#FF5252",
-            "#FFC400",
-            "#2979FF",
-            "#00E676",
-            ],
-            hoverBackgroundColor: [
-            "#FF5252",
-            "#FFC400",
-            "#2979FF",
-            "#00E676"
-            ],
-          }],
-        },
-        options: {
-          cutoutPercentage: 50,
-          responsive: true,
-          animation: {
-            animateScale: true
-          },
-          title: {
-            display: true,
-            text: elements_to_evaluate[i].name,
-          },
-          legend: {
-            display: false,
-          },
-        },
-      });
     }
 
     /**

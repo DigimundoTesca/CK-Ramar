@@ -108,6 +108,20 @@ def analytics(request):
             end_date = helper.naive_to_datetime(start_date + timedelta(days=1))
             today_suggestions = rates_helper.get_satisfaction_ratings(start_date, end_date)
             reactions_list = []
+            
+            total_reactions = {
+                'name': 'Total de Reacciones',
+                'reactions': {
+                    0: {'reaction': 'Enojado', 'quantity': 0},
+                    1: {'reaction': 'Triste', 'quantity': 0},
+                    2: {'reaction': 'Feliz', 'quantity': 0},
+                    3: {'reaction': 'Encantado', 'quantity': 0},
+                }
+            }
+            
+            for suggestion in today_suggestions:
+                total_reactions['reactions'][suggestion.satisfaction_rating-1]['quantity'] += 1
+
             for element_to_evaluate in rates_helper.elements_to_evaluate:
                 """ For every element chart """
                 element_object = {
@@ -126,7 +140,8 @@ def analytics(request):
                             element_object['reactions'][suggestion.satisfaction_rating-1]['quantity'] += 1
 
                 reactions_list.append(element_object)
-            return JsonResponse(reactions_list, safe=False)
+
+            return JsonResponse({'reactions_list': reactions_list, 'total_reactions': total_reactions})
         elif request.POST['type'] == 'reactions_week':
             initial_date = helper.parse_to_datetime(request.POST['dt_week'].split(',')[0])
             final_date = helper.parse_to_datetime(request.POST['dt_week'].split(',')[1])
