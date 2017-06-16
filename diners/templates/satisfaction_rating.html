@@ -94,6 +94,9 @@
     let secondsElapsed;
     let chronometer;
 
+    /**
+     * Shows the emojis and the elements to evaluate
+     */
     function showElements(emoji_level) {
       let rating_footel_title = $('.rating-footer-title');
       let buttons = $('.btn-option');
@@ -142,7 +145,10 @@
       $('.emojis-container').show(300);
       $('#header-question').show(300);
     }
-
+    
+    /**
+     * Hide the emojis and the elements to evaluate
+     */
     function hideElements() {
       $('#elements-container').hide(300);
       $('#btn-send-container').hide(300);
@@ -153,16 +159,25 @@
       $('#btn-write-commentary').find('span.icon-container .material-icons').text('send');
     }
 
+    /**
+     * Shows the suggestions container and the write and send suggestion
+     */
     function showSuggestionsContainer() {
       $('#suggestion-container').show(300)
       $('#anon-msg').removeClass('hidden')
     }
     
+    /**
+     * Hides the suggestions container and the write and send suggestion
+     */
     function hideSuggestionsContainer() {
       $('#suggestion-container').hide(300)
       $('#anon-msg').addClass('hidden')
     }
 
+    /**
+     * Collects all the data and sends this
+     */
     function sendTest() {
       console.log('enviarmos!')
       $.ajax({
@@ -213,6 +228,9 @@
       });
     }
 
+    /**
+     * Contains the Timer Object
+     */
     function Timer(fn, t){
       let timerObject = setInterval(fn, t);
       this.elapsedTime = 1;
@@ -239,6 +257,10 @@
       }
     }
 
+    /**
+     * If this is called for first time, creates the chronometer else
+     * reloads this
+     */
     function setChronometer() {
       if (userActive) {
         chronometer.elapsedTime = 1;
@@ -291,7 +313,6 @@
       selected_emoji.find('.emoji').addClass('selected');
 
       showElements(emoji_level);
-
     });
 
     /**
@@ -351,7 +372,7 @@
         $('#btn-write-commentary').attr('disabled', true);
       }
     });
-
+    
     $(this).on('click', '#btn-send-score', function(event) {
       sendTest();
     });
